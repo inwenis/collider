@@ -17,23 +17,8 @@ namespace WindowsFormsApp1
             var frames = new List<Frame>();
 
             var particles = RandomParticles(nParticles);
-            AddFast(particles);
+            AddFastParticles(particles);
 
-            //var particles = new List<Particle>
-            //{
-            //    new Particle()
-            //    {
-            //        Pos = new Vector2(10, 10),
-            //        Vel = new Vector2(2, 0)
-            //    },
-            //    new Particle()
-            //    {
-            //        Pos = new Vector2(40, 10),
-            //        Vel = new Vector2(0, 0)
-            //    },
-            //};
-
-            // make sure particles do not overlap TODO
             // get frame 0
             frames.Add(new Frame {Positions = particles.Select(x => x.Pos).ToList()});
 
@@ -61,7 +46,7 @@ namespace WindowsFormsApp1
                 Move(particles, beforeCollision);
                 t += beforeCollision;
 
-                ApplyCollision(particles, closestCollision);
+                ApplyCollision(closestCollision);
 
                 Move(particles, afterCollision);
                 t += afterCollision;
@@ -72,7 +57,7 @@ namespace WindowsFormsApp1
             return frames;
         }
 
-        private void AddFast(List<Particle> particles)
+        private void AddFastParticles(List<Particle> particles)
         {
             for (int i = 0; i < 10; i++)
             {
@@ -84,9 +69,9 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void ApplyCollision(List<Particle> particles, (Particle i, Particle j, double Value)? closestCollision)
+        private void ApplyCollision((Particle i, Particle j, double Value)? closestCollision)
         {
-            (Particle i, Particle j, double Value) = closestCollision.Value;
+            (Particle i, Particle j, _) = closestCollision.Value;
             var mi = 1;
             var mj = 1;
 
@@ -101,7 +86,6 @@ namespace WindowsFormsApp1
 
             var dvdr = dv.X * dr.X + dv.Y * dr.Y;
 
-            //var J = (2 * mi * mj * (dv * dr)) / (sigma * (mi + mj));
             var J = (2 * mi * mj) * dvdr/ (float) (sigma * (mi + mj));
 
             var Jx = (J * dr.X) / sigma;
@@ -214,10 +198,5 @@ namespace WindowsFormsApp1
             // TODO support min/max here
             return (r.NextDouble() - .5) * 5;
         }
-    }
-
-    public class Frame
-    {
-        public List<Vector2> Positions { get; set; }
     }
 }
