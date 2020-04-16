@@ -11,13 +11,14 @@ namespace WindowsFormsApp1
         public List<Frame> Simulate(int nFrames)
         {
             int nParticles = 20;
-            double step = 0.1;
+            double step = 0.1; // seconds
             double t = 0; // current time
 
             var frames = new List<Frame>();
 
-            var particles = RandomParticles(nParticles);
-            AddFastParticles(particles);
+            var particles = GenerateRandomParticles(nParticles);
+            var fastParticles = GenerateFastParticles(10);
+            particles.AddRange(fastParticles);
 
             // get frame 0
             frames.Add(new Frame {Positions = particles.Select(x => x.Pos).ToList()});
@@ -57,16 +58,42 @@ namespace WindowsFormsApp1
             return frames;
         }
 
-        private void AddFastParticles(List<Particle> particles)
+        private List<Particle> GenerateRandomParticles(int nParticles)
         {
-            for (int i = 0; i < 10; i++)
+            var xPosMin = 0;
+            var xPosMax = 200;
+
+            var yPosMin = 0;
+            var yPosMax = 200;
+
+            var random = new Random(DateTimeOffset.UtcNow.Millisecond);
+            var list = new List<Particle>();
+            for (int i = 0; i < nParticles; i++)
             {
-                particles.Add(new Particle
+                var particle = new Particle
+                {
+                    Pos = new Vector2(random.Next(xPosMin, xPosMax), random.Next(yPosMin, yPosMax)),
+                    Vel = new Vector2((float)NextDouble(random), (float)NextDouble(random))
+                };
+                list.Add(particle);
+            }
+
+            return list;
+        }
+
+        private List<Particle> GenerateFastParticles(int count)
+        {
+            var particles2 = new List<Particle>();
+            for (int i = 0; i < count; i++)
+            {
+                particles2.Add(new Particle
                 {
                     Pos = new Vector2(800, i * 20),
                     Vel = new Vector2(-20, 0)
                 });
             }
+
+            return particles2;
         }
 
         private void ApplyCollision((Particle i, Particle j, double Value)? closestCollision)
@@ -167,30 +194,6 @@ namespace WindowsFormsApp1
                 //Console.WriteLine($"collision at {dt}");
                 return dt;
             }
-        }
-
-
-        private List<Particle> RandomParticles(int nParticles)
-        {
-            var xPosMin = 0;
-            var xPosMax = 200;
-
-            var yPosMin = 0;
-            var yPosMax = 200;
-
-            var random = new Random(DateTimeOffset.UtcNow.Millisecond);
-            var list = new List<Particle>();
-            for (int i = 0; i < nParticles; i++)
-            {
-                var particle = new Particle
-                {
-                    Pos = new Vector2(random.Next(xPosMin, xPosMax), random.Next(yPosMin, yPosMax)),
-                    Vel = new Vector2((float) NextDouble(random), (float) NextDouble(random))
-                };
-                list.Add(particle);
-            }
-
-            return list;
         }
 
         private static double NextDouble(Random r)
