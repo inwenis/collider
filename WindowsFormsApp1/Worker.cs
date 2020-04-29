@@ -23,16 +23,18 @@ namespace WindowsFormsApp1
             // get frame 0
             frames.Add(new Frame {Positions = particles.Select(x => x.Pos).ToList()});
 
+            var closestCollision = CheckCollisionAll(particles);
+            var nextCollisionTime = closestCollision?.Value + t ?? double.MaxValue;
+            var nextFrameTime = t + step;
+
             while (frames.Count < nFrames)
             {
-                // get next collision
-                var closestCollision = CheckCollisionAll(particles);
-                var nextCollisionTime = closestCollision?.Value + t ?? double.MaxValue;
-                while (t + step < nextCollisionTime && frames.Count < nFrames)
+                while (nextFrameTime < nextCollisionTime && frames.Count < nFrames)
                 {
                     Move(particles, (float) step);
                     frames.Add(new Frame {Positions = particles.Select(x => x.Pos).ToList()});
-                    t += step;
+                    t = nextFrameTime;
+                    nextFrameTime += step;
                 }
 
                 if (frames.Count >= nFrames)
@@ -40,17 +42,20 @@ namespace WindowsFormsApp1
                     break;
                 }
 
-                // simulate frames till next collision
-                float beforeCollision = (float) (nextCollisionTime - t);
-                float afterCollision = (float) (step - beforeCollision);
+                while (nextFrameTime > nextCollisionTime)
+                {
+                    float beforeCollision = (float)(nextCollisionTime - t);
+                    Move(particles, beforeCollision);
+                    t += beforeCollision;
+                    ApplyCollision(closestCollision);
+                    closestCollision = CheckCollisionAll(particles);
+                    nextCollisionTime = closestCollision?.Value + t ?? double.MaxValue;
+                }
 
-                Move(particles, beforeCollision);
-                t += beforeCollision;
-
-                ApplyCollision(closestCollision);
-
-                Move(particles, afterCollision);
-                t += afterCollision;
+                Move(particles, (float) (nextFrameTime - t));
+                frames.Add(new Frame { Positions = particles.Select(x => x.Pos).ToList() });
+                t = nextFrameTime;
+                nextFrameTime += step;
             }
 
             Debug.WriteLine($"Computed: {frames.Count} frames");
