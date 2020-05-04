@@ -23,8 +23,9 @@ namespace WindowsFormsApp1
             // get frame 0
             frames.Add(new Frame {Positions = particles.Select(x => x.Pos).ToList()});
 
-            var closestCollision = CheckCollisionAll(particles);
-            var nextCollisionTime = closestCollision?.Value + t ?? double.MaxValue;
+            var closestCol = ClosestCol(particles);
+
+            var nextCollisionTime = closestCol?.Dt + t ?? double.MaxValue;
             var nextFrameTime = t + step;
 
             while (frames.Count < nFrames)
@@ -47,9 +48,9 @@ namespace WindowsFormsApp1
                     float beforeCollision = (float)(nextCollisionTime - t);
                     Move(particles, beforeCollision);
                     t += beforeCollision;
-                    ApplyCollision(closestCollision);
-                    closestCollision = CheckCollisionAll(particles);
-                    nextCollisionTime = closestCollision?.Value + t ?? double.MaxValue;
+                    ApplyCollision(closestCol);
+                    closestCol = ClosestCol(particles);
+                    nextCollisionTime = closestCol?.Dt + t ?? double.MaxValue;
                 }
 
                 Move(particles, (float) (nextFrameTime - t));
@@ -61,6 +62,105 @@ namespace WindowsFormsApp1
             Debug.WriteLine($"Computed: {frames.Count} frames");
 
             return frames;
+        }
+
+        private Collision ClosestCol(List<Particle> particles)
+        {
+            var closestPartCollision = CheckPartCollisions(particles);
+            var closestWallCollision = CheckWallCollisions(particles);
+            Collision closestCol;
+            if (closestPartCollision == null)
+            {
+                closestCol = closestWallCollision;
+            }
+            else if (closestWallCollision == null)
+            {
+                closestCol = closestPartCollision;
+            }
+            else if (closestWallCollision == null && closestPartCollision == null)
+            {
+                closestCol = null;
+            }
+            else
+            {
+                closestCol = closestWallCollision.Dt < closestPartCollision.Dt
+                    ? closestWallCollision
+                    : closestPartCollision;
+            }
+
+            return closestCol;
+        }
+
+        private Collision CheckWallCollisions(List<Particle> particles)
+        {
+            var xs = new List<(Particle i, Particle j, double Value)>();
+            var ys = new List<(Particle i, Particle j, double Value)>();
+
+            foreach (var i in particles)
+            {
+                var x = CheckWallCollisionX(i.Pos, i.Vel);
+                var y = CheckWallCollisionY(i.Pos, i.Vel);
+                if (x.HasValue)
+                {
+                    xs.Add((i, null, x.Value));
+                }
+                if (y.HasValue)
+                {
+                    ys.Add((i, null, y.Value));
+                }
+            }
+
+            var xss = xs
+                .Where(x => x.Value > 0)
+                .Select(x => new Collision(x.i, x.Value, isWallCollision: true, wall: "x"));
+            var yss = ys
+                .Where(x => x.Value > 0)
+                .Select(x => new Collision(x.i, x.Value, isWallCollision: true, wall: "y"));
+            var closestWallCollision = xss.Concat(yss).OrderBy(x => x.Dt).FirstOrDefault();
+
+            return closestWallCollision;
+        }
+
+        private double? CheckWallCollisionY(Vector2 r, Vector2 v)
+        {
+            double? dt = 0;
+            double si = 5; // sigma, radius
+
+            if (v.Y > 0)
+            {
+                dt = (1 - si - r.Y) / v.Y;
+            }
+            else if (v.Y < 0)
+            {
+                dt = (si - r.Y) / v.Y;
+            }
+            else //v.Y == 0
+            {
+                dt = null;
+            }
+
+            return dt;
+        }
+
+        private double? CheckWallCollisionX(Vector2 r, Vector2 v)
+        {
+            double? dt = 0;
+            double si = 5; // sigma, radius
+
+            if (v.X > 0)
+            {
+                dt = (1 - si - r.X) / v.X;
+            }
+            else if (v.X < 0)
+            {
+                dt = (si - r.X) / v.X;
+            }
+            else //v.Y == 0
+            {
+                dt = null;
+            }
+
+            return dt;
         }
 
         private List<Particle> GenerateRandomParticles(int nParticles)
@@ -101,36 +201,48 @@ namespace WindowsFormsApp1
             return particles2;
         }
 
-        private void ApplyCollision((Particle i, Particle j, double Value)? closestCollision)
+        private void ApplyCollision(Collision c)
         {
-            (Particle i, Particle j, _) = closestCollision.Value;
-            var mi = 1;
-            var mj = 1;
+            if (!c.IsWallCollision)
+            {
+                var i = c.ParticleI;
+                var j = c.ParticleJ;
+                var mi = 1;
+                var mj = 1;
 
-            double si = 5; // sigma, radius
-            double sj = 5;
+                double si = 5; // sigma, radius
+                double sj = 5;
 
-            var sigma = si + sj;
+                var sigma = si + sj;
 
-            Vector2 dr = j.Pos - i.Pos;
+                Vector2 dr = j.Pos - i.Pos;
 
-            Vector2 dv = j.Vel - i.Vel;
+                Vector2 dv = j.Vel - i.Vel;
 
-            var dvdr = dv.X * dr.X + dv.Y * dr.Y;
+                var dvdr = dv.X * dr.X + dv.Y * dr.Y;
 
-            var J = (2 * mi * mj) * dvdr/ (float) (sigma * (mi + mj));
+                var J = (2 * mi * mj) * dvdr / (float)(sigma * (mi + mj));
 
-            var Jx = (J * dr.X) / sigma;
-            var Jy = (J * dr.Y) / sigma;
+                var Jx = (J * dr.X) / sigma;
+                var Jy = (J * dr.Y) / sigma;
 
-            var vxip = (i.Vel.X + Jx) / mi;
-            var vyip = (i.Vel.Y + Jy) / mi;
+                var vxip = (i.Vel.X + Jx) / mi;
+                var vyip = (i.Vel.Y + Jy) / mi;
 
-            var vxjp = (j.Vel.X - Jx) / mj;
-            var vyjp = (j.Vel.Y - Jy) / mj;
+                var vxjp = (j.Vel.X - Jx) / mj;
+                var vyjp = (j.Vel.Y - Jy) / mj;
 
-            i.Vel = new Vector2((float)vxip, (float)vyip);
-            j.Vel = new Vector2((float)vxjp, (float)vyjp);
+                i.Vel = new Vector2((float)vxip, (float)vyip);
+                j.Vel = new Vector2((float)vxjp, (float)vyjp);
+            }
+            else if (c.IsWallCollision && c.Wall == "x")
+            {
+                c.ParticleI.Vel = c.ParticleI.Vel * (-Vector2.UnitX);
+            }
+            else if (c.IsWallCollision && c.Wall == "y")
+            {
+                c.ParticleI.Vel = c.ParticleI.Vel * (-Vector2.UnitY);
+            }
         }
 
         private void Move(List<Particle> particles, float t)
@@ -141,31 +253,22 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static (Particle i, Particle j, double Value)? CheckCollisionAll(IEnumerable<Particle> particles)
+        private static Collision CheckPartCollisions(IEnumerable<Particle> particles)
         {
-            var collisions = new List<(Particle i, Particle j, double Value)>();
+            var collisions = new List<Collision>();
             foreach (var i in particles)
             {
                 foreach (var j in particles)
                 {
-                    var checkCollision = CheckCollision(i.Pos, i.Vel, j.Pos, j.Vel);
-                    if (checkCollision.HasValue)
+                    var c = CheckCollision(i.Pos, i.Vel, j.Pos, j.Vel);
+                    if (c.HasValue)
                     {
-                        collisions.Add((i, j, checkCollision.Value));
+                        collisions.Add(new Collision(i, j, c.Value));
                     }
                 }
             }
 
-            if (collisions.Any(x => x.Value > 0))
-            {
-                var min = collisions.Where(x => x.Value > 0).Min(x => x.Value);
-                var c = collisions.Find(x => x.Value == min);
-                return c;
-            }
-            else
-            {
-                return null;
-            }
+            return collisions.OrderBy(x => x.Dt).FirstOrDefault();
         }
 
         private static double? CheckCollision(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
@@ -205,6 +308,31 @@ namespace WindowsFormsApp1
         {
             // TODO support min/max here
             return (r.NextDouble() - .5) * 5;
+        }
+    }
+
+    internal class Collision
+    {
+        public Particle ParticleI { get; }
+        public Particle ParticleJ { get; }
+        public double Dt { get; }
+        public bool IsWallCollision { get; }
+        public string Wall { get; }
+
+        public Collision(Particle particleI, double dt, bool isWallCollision, string wall)
+        {
+            ParticleI = particleI;
+            Dt = dt;
+            IsWallCollision = isWallCollision;
+            Wall = wall;
+        }
+
+        public Collision(Particle particleI, Particle particleJ, double dt)
+        {
+            ParticleI = particleI;
+            ParticleJ = particleJ;
+            Dt = dt;
+            IsWallCollision = false;
         }
     }
 }
