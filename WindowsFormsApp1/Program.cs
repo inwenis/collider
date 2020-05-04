@@ -23,7 +23,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
 
             var w = new Worker();
-            var nFrames = 1000;
+            var nFrames = 4000;
             var frames = w.Simulate(nFrames);
 
             _mainForm = new Form1();

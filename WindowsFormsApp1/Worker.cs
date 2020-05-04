@@ -128,7 +128,7 @@ namespace WindowsFormsApp1
 
             if (v.Y > 0)
             {
-                dt = (1 - si - r.Y) / v.Y;
+                dt = (400 - si - r.Y) / v.Y;
             }
             else if (v.Y < 0)
             {
@@ -149,7 +149,7 @@ namespace WindowsFormsApp1
 
             if (v.X > 0)
             {
-                dt = (1 - si - r.X) / v.X;
+                dt = (700 - si - r.X) / v.X;
             }
             else if (v.X < 0)
             {
@@ -237,11 +237,11 @@ namespace WindowsFormsApp1
             }
             else if (c.IsWallCollision && c.Wall == "x")
             {
-                c.ParticleI.Vel = c.ParticleI.Vel * (-Vector2.UnitX);
+                c.ParticleI.Vel = c.ParticleI.Vel * new Vector2(-1, 1);
             }
             else if (c.IsWallCollision && c.Wall == "y")
             {
-                c.ParticleI.Vel = c.ParticleI.Vel * (-Vector2.UnitY);
+                c.ParticleI.Vel = c.ParticleI.Vel * new Vector2(1, -1);
             }
         }
 
