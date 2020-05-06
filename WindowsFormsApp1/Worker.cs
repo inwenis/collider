@@ -91,10 +91,10 @@ namespace WindowsFormsApp1
             {
                 foreach (var j in particles)
                 {
-                    var c = CheckCollision(i.Pos, i.Vel, j.Pos, j.Vel);
-                    if (c.HasValue)
+                    var dt = ComputeCollisionTime(i.Pos, i.Vel, j.Pos, j.Vel);
+                    if (dt.HasValue)
                     {
-                        collisions.Add(new Collision(i, j, c.Value));
+                        collisions.Add(new Collision(i, j, dt.Value));
                     }
                 }
             }
@@ -102,7 +102,7 @@ namespace WindowsFormsApp1
             return collisions.OrderBy(x => x.Dt).FirstOrDefault();
         }
 
-        private static double? CheckCollision(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
+        private static double? ComputeCollisionTime(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
         {
             double si = 5; // sigma, radius
 
