@@ -23,9 +23,9 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
 
             var w = new Worker();
-            var nFrames = 4000;
+            var nFrames = 1000;
 
-            var particles = ParticlesGenerator.RandomParticles2(20);
+            var particles = ParticlesGenerator.RandomParticles(20);
             var fastParticles = ParticlesGenerator.RandomFastParticles(10);
             particles.AddRange(fastParticles);
 

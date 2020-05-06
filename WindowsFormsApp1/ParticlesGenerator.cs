@@ -6,7 +6,7 @@ namespace WindowsFormsApp1
 {
     internal static class ParticlesGenerator
     {
-        public static List<Particle> RandomParticles2(int count)
+        public static List<Particle> RandomParticles(int count)
         {
             var xPosMin = 0;
             var xPosMax = 200;
