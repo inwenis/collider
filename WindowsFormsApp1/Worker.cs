@@ -20,7 +20,7 @@ namespace WindowsFormsApp1
             // get frame 0
             frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
 
-            var c = ClosestCol(particlesArr);
+            var c = ComputeClosestCollision(particlesArr);
             var tc = t + c?.Dt ?? double.MaxValue; // time of next collision
             var tf = t + step; // time of next frame
             float tbc; // time remaining to next collision
@@ -46,7 +46,7 @@ namespace WindowsFormsApp1
                     Move(particlesArr, tbc);
                     t += tbc;
                     ApplyCollision(c);
-                    c = ClosestCol(particlesArr);
+                    c = ComputeClosestCollision(particlesArr);
                     tc = t + c?.Dt ?? double.MaxValue;
                 }
 
@@ -61,34 +61,82 @@ namespace WindowsFormsApp1
             return frames;
         }
 
-        private Collision ClosestCol(Particle[] particles)
+        private Collision ComputeClosestCollision(Particle[] particles)
         {
-            var closestPartCollision = CheckPartCollisions(particles);
-            var closestWallCollision = CheckWallCollisions(particles);
-            Collision closestCol;
-            if (closestPartCollision == null)
+            var ppc = ComputeClosestPpCollision(particles);
+            var pwc = ComputeClosestPwCollision(particles);
+            if (pwc != null && ppc != null)
             {
-                closestCol = closestWallCollision;
+                return pwc.Dt < ppc.Dt
+                    ? pwc
+                    : ppc;
             }
-            else if (closestWallCollision == null)
+            if (pwc != null)
             {
-                closestCol = closestPartCollision;
+                return pwc;
             }
-            else if (closestWallCollision == null && closestPartCollision == null)
+            if (ppc != null)
             {
-                closestCol = null;
+                return ppc;
+            }
+
+            return null;
+        }
+
+        // PP collision - particle - particle collision
+        private static Collision ComputeClosestPpCollision(Particle[] particles)
+        {
+            var collisions = new List<Collision>();
+            foreach (var i in particles)
+            {
+                foreach (var j in particles)
+                {
+                    var c = CheckCollision(i.Pos, i.Vel, j.Pos, j.Vel);
+                    if (c.HasValue)
+                    {
+                        collisions.Add(new Collision(i, j, c.Value));
+                    }
+                }
+            }
+
+            return collisions.OrderBy(x => x.Dt).FirstOrDefault();
+        }
+
+        private static double? CheckCollision(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
+        {
+            double si = 5; // sigma, radius
+
+            double sj = 5;
+
+            Vector2 dr = rj - ri;
+            Vector2 dv = vj - vi;
+
+            var s_pow_2 = Math.Pow(si + sj, 2);
+
+            var dvdr = dv.X * dr.X + dv.Y * dr.Y;
+            var dvdv = Math.Pow(dv.X, 2) + Math.Pow(dv.Y, 2);
+            var drdr = Math.Pow(dr.X, 2) + Math.Pow(dr.Y, 2);
+            var d = Math.Pow(dvdr, 2) - dvdv * (drdr - s_pow_2);
+            if (dvdr >= 0)
+            {
+                //Console.WriteLine("no collision");
+                return null;
+            }
+            else if (d < 0)
+            {
+                //Console.WriteLine("no collision");
+                return null;
             }
             else
             {
-                closestCol = closestWallCollision.Dt < closestPartCollision.Dt
-                    ? closestWallCollision
-                    : closestPartCollision;
+                var dt = -(dvdr + Math.Sqrt(d)) / dvdv;
+                //Console.WriteLine($"collision at {dt}");
+                return dt;
             }
-
-            return closestCol;
         }
 
-        private Collision CheckWallCollisions(Particle[] particles)
+        // PW collision - particle - wall collision
+        private Collision ComputeClosestPwCollision(Particle[] particles)
         {
             var xs = new List<(Particle i, Particle j, double Value)>();
             var ys = new List<(Particle i, Particle j, double Value)>();
@@ -209,57 +257,6 @@ namespace WindowsFormsApp1
             foreach (var particle in particles)
             {
                 particle.Pos = particle.Pos + Vector2.Multiply(particle.Vel, t);
-            }
-        }
-
-        private static Collision CheckPartCollisions(Particle[] particles)
-        {
-            var collisions = new List<Collision>();
-            foreach (var i in particles)
-            {
-                foreach (var j in particles)
-                {
-                    var c = CheckCollision(i.Pos, i.Vel, j.Pos, j.Vel);
-                    if (c.HasValue)
-                    {
-                        collisions.Add(new Collision(i, j, c.Value));
-                    }
-                }
-            }
-
-            return collisions.OrderBy(x => x.Dt).FirstOrDefault();
-        }
-
-        private static double? CheckCollision(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
-        {
-            double si = 5; // sigma, radius
-
-            double sj = 5;
-
-            Vector2 dr = rj - ri;
-            Vector2 dv = vj - vi;
-
-            var s_pow_2 = Math.Pow(si + sj, 2);
-
-            var dvdr = dv.X * dr.X + dv.Y * dr.Y;
-            var dvdv = Math.Pow(dv.X, 2) + Math.Pow(dv.Y, 2);
-            var drdr = Math.Pow(dr.X, 2) + Math.Pow(dr.Y, 2);
-            var d = Math.Pow(dvdr, 2) - dvdv * (drdr - s_pow_2);
-            if (dvdr >= 0)
-            {
-                //Console.WriteLine("no collision");
-                return null;
-            }
-            else if (d < 0)
-            {
-                //Console.WriteLine("no collision");
-                return null;
-            }
-            else
-            {
-                var dt = -(dvdr + Math.Sqrt(d)) / dvdv;
-                //Console.WriteLine($"collision at {dt}");
-                return dt;
             }
         }
     }
