@@ -24,7 +24,7 @@ namespace WindowsFormsApp1
 
             var w = new Worker();
             var nFrames = 4000;
-            var frames = w.Simulate(nFrames);
+            var frames = w.Simulate(nFrames, ParticlesGenerator.Particles(20));
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;

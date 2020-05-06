@@ -8,22 +8,19 @@ namespace WindowsFormsApp1
 {
     public class Worker
     {
-        public List<Frame> Simulate(int nFrames)
+        public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles)
         {
-            int nParticles = 20;
+            var particlesArr = particles.ToArray();
+
             double step = 0.1; // seconds
             double t = 0; // current time
 
             var frames = new List<Frame>();
 
-            var particles = GenerateRandomParticles(nParticles);
-            var fastParticles = GenerateFastParticles(10);
-            particles.AddRange(fastParticles);
-
             // get frame 0
-            frames.Add(new Frame {Positions = particles.Select(x => x.Pos).ToList()});
+            frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
 
-            var closestCol = ClosestCol(particles);
+            var closestCol = ClosestCol(particlesArr);
 
             var nextCollisionTime = closestCol?.Dt + t ?? double.MaxValue;
             var nextFrameTime = t + step;
@@ -32,8 +29,8 @@ namespace WindowsFormsApp1
             {
                 while (nextFrameTime < nextCollisionTime && frames.Count < nFrames)
                 {
-                    Move(particles, (float) step);
-                    frames.Add(new Frame {Positions = particles.Select(x => x.Pos).ToList()});
+                    Move(particlesArr, (float) step);
+                    frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
                     t = nextFrameTime;
                     nextFrameTime += step;
                 }
@@ -46,15 +43,15 @@ namespace WindowsFormsApp1
                 while (nextFrameTime > nextCollisionTime)
                 {
                     float beforeCollision = (float)(nextCollisionTime - t);
-                    Move(particles, beforeCollision);
+                    Move(particlesArr, beforeCollision);
                     t += beforeCollision;
                     ApplyCollision(closestCol);
-                    closestCol = ClosestCol(particles);
+                    closestCol = ClosestCol(particlesArr);
                     nextCollisionTime = closestCol?.Dt + t ?? double.MaxValue;
                 }
 
-                Move(particles, (float) (nextFrameTime - t));
-                frames.Add(new Frame { Positions = particles.Select(x => x.Pos).ToList() });
+                Move(particlesArr, (float) (nextFrameTime - t));
+                frames.Add(new Frame { Positions = particlesArr.Select(x => x.Pos).ToList() });
                 t = nextFrameTime;
                 nextFrameTime += step;
             }
@@ -64,7 +61,7 @@ namespace WindowsFormsApp1
             return frames;
         }
 
-        private Collision ClosestCol(List<Particle> particles)
+        private Collision ClosestCol(Particle[] particles)
         {
             var closestPartCollision = CheckPartCollisions(particles);
             var closestWallCollision = CheckWallCollisions(particles);
@@ -91,7 +88,7 @@ namespace WindowsFormsApp1
             return closestCol;
         }
 
-        private Collision CheckWallCollisions(List<Particle> particles)
+        private Collision CheckWallCollisions(Particle[] particles)
         {
             var xs = new List<(Particle i, Particle j, double Value)>();
             var ys = new List<(Particle i, Particle j, double Value)>();
@@ -163,44 +160,6 @@ namespace WindowsFormsApp1
             return dt;
         }
 
-        private List<Particle> GenerateRandomParticles(int nParticles)
-        {
-            var xPosMin = 0;
-            var xPosMax = 200;
-
-            var yPosMin = 0;
-            var yPosMax = 200;
-
-            var random = new Random(DateTimeOffset.UtcNow.Millisecond);
-            var list = new List<Particle>();
-            for (int i = 0; i < nParticles; i++)
-            {
-                var particle = new Particle
-                {
-                    Pos = new Vector2(random.Next(xPosMin, xPosMax), random.Next(yPosMin, yPosMax)),
-                    Vel = new Vector2((float)NextDouble(random), (float)NextDouble(random))
-                };
-                list.Add(particle);
-            }
-
-            return list;
-        }
-
-        private List<Particle> GenerateFastParticles(int count)
-        {
-            var particles2 = new List<Particle>();
-            for (int i = 0; i < count; i++)
-            {
-                particles2.Add(new Particle
-                {
-                    Pos = new Vector2(800, i * 20),
-                    Vel = new Vector2(-20, 0)
-                });
-            }
-
-            return particles2;
-        }
-
         private void ApplyCollision(Collision c)
         {
             if (!c.IsWallCollision)
@@ -245,7 +204,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void Move(List<Particle> particles, float t)
+        private void Move(Particle[] particles, float t)
         {
             foreach (var particle in particles)
             {
@@ -253,7 +212,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static Collision CheckPartCollisions(IEnumerable<Particle> particles)
+        private static Collision CheckPartCollisions(Particle[] particles)
         {
             var collisions = new List<Collision>();
             foreach (var i in particles)
@@ -302,12 +261,6 @@ namespace WindowsFormsApp1
                 //Console.WriteLine($"collision at {dt}");
                 return dt;
             }
-        }
-
-        private static double NextDouble(Random r)
-        {
-            // TODO support min/max here
-            return (r.NextDouble() - .5) * 5;
         }
     }
 
