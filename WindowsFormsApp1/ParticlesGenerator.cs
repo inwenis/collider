@@ -6,15 +6,7 @@ namespace WindowsFormsApp1
 {
     internal static class ParticlesGenerator
     {
-        public static List<Particle> Particles(int nParticles)
-        {
-            var particles = GenerateRandomParticles(nParticles);
-            var fastParticles = GenerateFastParticles(10);
-            particles.AddRange(fastParticles);
-            return particles;
-        }
-
-        public static List<Particle> GenerateRandomParticles(int nParticles)
+        public static List<Particle> RandomParticles2(int count)
         {
             var xPosMin = 0;
             var xPosMax = 200;
@@ -24,7 +16,7 @@ namespace WindowsFormsApp1
 
             var random = new Random(DateTimeOffset.UtcNow.Millisecond);
             var list = new List<Particle>();
-            for (int i = 0; i < nParticles; i++)
+            for (int i = 0; i < count; i++)
             {
                 var particle = new Particle
                 {
@@ -37,19 +29,19 @@ namespace WindowsFormsApp1
             return list;
         }
 
-        public static List<Particle> GenerateFastParticles(int count)
+        public static List<Particle> RandomFastParticles(int count)
         {
-            var particles2 = new List<Particle>();
+            var particles = new List<Particle>();
             for (int i = 0; i < count; i++)
             {
-                particles2.Add(new Particle
+                particles.Add(new Particle
                 {
                     Pos = new Vector2(800, i * 20),
                     Vel = new Vector2(-20, 0)
                 });
             }
 
-            return particles2;
+            return particles;
         }
     }
 }
