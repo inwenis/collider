@@ -20,19 +20,19 @@ namespace WindowsFormsApp1
             // get frame 0
             frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
 
-            var closestCol = ClosestCol(particlesArr);
-
-            var nextCollisionTime = closestCol?.Dt + t ?? double.MaxValue;
-            var nextFrameTime = t + step;
+            var c = ClosestCol(particlesArr);
+            var tc = t + c?.Dt ?? double.MaxValue; // time of next collision
+            var tf = t + step; // time of next frame
+            float tbc; // time remaining to next collision
 
             while (frames.Count < nFrames)
             {
-                while (nextFrameTime < nextCollisionTime && frames.Count < nFrames)
+                while (tf < tc && frames.Count < nFrames)
                 {
                     Move(particlesArr, (float) step);
                     frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
-                    t = nextFrameTime;
-                    nextFrameTime += step;
+                    t = tf;
+                    tf += step;
                 }
 
                 if (frames.Count >= nFrames)
@@ -40,20 +40,20 @@ namespace WindowsFormsApp1
                     break;
                 }
 
-                while (nextFrameTime > nextCollisionTime)
+                while (tf > tc)
                 {
-                    float beforeCollision = (float)(nextCollisionTime - t);
-                    Move(particlesArr, beforeCollision);
-                    t += beforeCollision;
-                    ApplyCollision(closestCol);
-                    closestCol = ClosestCol(particlesArr);
-                    nextCollisionTime = closestCol?.Dt + t ?? double.MaxValue;
+                    tbc = (float)(tc - t);
+                    Move(particlesArr, tbc);
+                    t += tbc;
+                    ApplyCollision(c);
+                    c = ClosestCol(particlesArr);
+                    tc = t + c?.Dt ?? double.MaxValue;
                 }
 
-                Move(particlesArr, (float) (nextFrameTime - t));
+                Move(particlesArr, (float) (tf - t));
                 frames.Add(new Frame { Positions = particlesArr.Select(x => x.Pos).ToList() });
-                t = nextFrameTime;
-                nextFrameTime += step;
+                t = tf;
+                tf += step;
             }
 
             Debug.WriteLine($"Computed: {frames.Count} frames");
