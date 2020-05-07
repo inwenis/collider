@@ -11,27 +11,27 @@ namespace WindowsFormsApp1
         public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles)
         {
             var particlesArr = particles.ToArray();
-            double step = 0.1; // seconds
-            double t = 0; // time
+            float step = (float) 0.1; // seconds
+            float t = 0; // time
             var frames = new List<Frame>();
             var c = ComputeClosestCollision(particlesArr);
-            var tc = t + c?.Dt ?? double.MaxValue; // time of next collision
+            float tc = t + c?.Dt ?? float.MaxValue; // time of next collision
             float ttc; // time to next collision
             float ttf; // time to next frame
 
             // tf - time of frame
             foreach (var tf in Enumerable.Range(0, nFrames).Select(x => x * step))
             {
-                ttf = (float) (tf - t);
+                ttf = tf - t;
                 while (tc < tf)
                 {
-                    ttc = (float) (tc - t);
+                    ttc = tc - t;
                     Move(particlesArr, ttc);
                     ApplyCollision(c);
                     c = ComputeClosestCollision(particlesArr);
                     t = tc;
-                    tc = tc + c?.Dt ?? double.MaxValue;
-                    ttf = (float)(tf - t);
+                    tc = tc + c?.Dt ?? float.MaxValue;
+                    ttf = tf - t;
                 }
                 Move(particlesArr, ttf);
                 AddFrame(frames, particlesArr);
@@ -89,11 +89,11 @@ namespace WindowsFormsApp1
             return collisions.OrderBy(x => x.Dt).FirstOrDefault();
         }
 
-        private static double? ComputeCollisionTime(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
+        private static float? ComputeCollisionTime(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
         {
-            double si = 5; // sigma, radius
+            float si = 5; // sigma, radius
 
-            double sj = 5;
+            float sj = 5;
 
             Vector2 dr = rj - ri;
             Vector2 dv = vj - vi;
@@ -116,17 +116,17 @@ namespace WindowsFormsApp1
             }
             else
             {
-                var dt = -(dvdr + Math.Sqrt(d)) / dvdv;
+                double dt = -(dvdr + Math.Sqrt(d)) / dvdv;
                 //Console.WriteLine($"collision at {dt}");
-                return dt;
+                return (float?) dt;
             }
         }
 
         // PW collision - particle - wall collision
         private Collision ComputeClosestPwCollision(Particle[] particles)
         {
-            var xs = new List<(Particle i, Particle j, double Value)>();
-            var ys = new List<(Particle i, Particle j, double Value)>();
+            var xs = new List<(Particle i, Particle j, float Value)>();
+            var ys = new List<(Particle i, Particle j, float Value)>();
 
             foreach (var i in particles)
             {
@@ -153,10 +153,10 @@ namespace WindowsFormsApp1
             return closestWallCollision;
         }
 
-        private double? CheckWallCollisionY(Vector2 r, Vector2 v)
+        private float? CheckWallCollisionY(Vector2 r, Vector2 v)
         {
-            double? dt;
-            double si = 5; // sigma, radius
+            float? dt;
+            float si = 5; // sigma, radius
 
             if (v.Y > 0)
             {
@@ -174,10 +174,10 @@ namespace WindowsFormsApp1
             return dt;
         }
 
-        private double? CheckWallCollisionX(Vector2 r, Vector2 v)
+        private float? CheckWallCollisionX(Vector2 r, Vector2 v)
         {
-            double? dt;
-            double si = 5; // sigma, radius
+            float? dt;
+            float si = 5; // sigma, radius
 
             if (v.X > 0)
             {
@@ -252,11 +252,11 @@ namespace WindowsFormsApp1
     {
         public Particle ParticleI { get; }
         public Particle ParticleJ { get; }
-        public double Dt { get; }
+        public float Dt { get; }
         public bool IsWallCollision { get; }
         public string Wall { get; }
 
-        public Collision(Particle particleI, double dt, bool isWallCollision, string wall)
+        public Collision(Particle particleI, float dt, bool isWallCollision, string wall)
         {
             ParticleI = particleI;
             Dt = dt;
@@ -264,7 +264,7 @@ namespace WindowsFormsApp1
             Wall = wall;
         }
 
-        public Collision(Particle particleI, Particle particleJ, double dt)
+        public Collision(Particle particleI, Particle particleJ, float dt)
         {
             ParticleI = particleI;
             ParticleJ = particleJ;
