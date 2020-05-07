@@ -19,13 +19,10 @@ namespace WindowsFormsApp1
             float ttc; // time to next collision
             float ttf; // time to next frame
 
-            // add frame at t=0
-            AddFrame(frames, particlesArr);
-
             // tf - time of frame
-            foreach (double tf in Enumerable.Range(0, nFrames).Select(x => x * step))
+            foreach (var tf in Enumerable.Range(0, nFrames).Select(x => x * step))
             {
-                ttf = (float)step;
+                ttf = (float) (tf - t);
                 while (tc < tf)
                 {
                     ttc = (float) (tc - t);

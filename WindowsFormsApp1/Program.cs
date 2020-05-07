@@ -23,7 +23,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
 
             var w = new Worker();
-            var nFrames = 1000;
+            var nFrames = 100;
 
             var particles = ParticlesGenerator.RandomParticles(20);
             var fastParticles = ParticlesGenerator.RandomFastParticles(10);
