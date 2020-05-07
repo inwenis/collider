@@ -15,7 +15,7 @@ namespace WindowsFormsApp1
 
             Collision c;
             float step; // seconds
-            float t; // time
+            float t;   // time
             float tc;  // time of next collision
             float ttc; // time to next collision
             float ttf; // time to next frame
@@ -25,7 +25,7 @@ namespace WindowsFormsApp1
             c = ComputeClosestCollision(particlesArr);
             tc = t + c?.Dt ?? float.MaxValue;
 
-            // tf - time of frame
+            // tf - time of next frame
             foreach (var tf in Enumerable.Range(0, nFrames).Select(x => x * step))
             {
                 ttf = tf - t;
