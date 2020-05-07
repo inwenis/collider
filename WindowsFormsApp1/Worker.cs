@@ -11,13 +11,19 @@ namespace WindowsFormsApp1
         public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles)
         {
             var particlesArr = particles.ToArray();
-            float step = (float) 0.1; // seconds
-            float t = 0; // time
             var frames = new List<Frame>();
-            var c = ComputeClosestCollision(particlesArr);
-            float tc = t + c?.Dt ?? float.MaxValue; // time of next collision
+
+            Collision c;
+            float step; // seconds
+            float t; // time
+            float tc;  // time of next collision
             float ttc; // time to next collision
             float ttf; // time to next frame
+
+            step = (float)0.1;
+            t = 0;
+            c = ComputeClosestCollision(particlesArr);
+            tc = t + c?.Dt ?? float.MaxValue;
 
             // tf - time of frame
             foreach (var tf in Enumerable.Range(0, nFrames).Select(x => x * step))
