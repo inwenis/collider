@@ -11,54 +11,44 @@ namespace WindowsFormsApp1
         public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles)
         {
             var particlesArr = particles.ToArray();
-
             double step = 0.1; // seconds
-            double t = 0; // current time
-
+            double t = 0; // time
             var frames = new List<Frame>();
-
-            // get frame 0
-            frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
-
             var c = ComputeClosestCollision(particlesArr);
             var tc = t + c?.Dt ?? double.MaxValue; // time of next collision
-            var tf = t + step; // time of next frame
-            float tbc; // time remaining to next collision
+            float ttc; // time to next collision
+            float ttf; // time to next frame
 
-            while (frames.Count < nFrames)
+            // add frame at t=0
+            AddFrame(frames, particlesArr);
+
+            // tf - time of frame
+            foreach (double tf in Enumerable.Range(0, nFrames).Select(x => x * step))
             {
-                while (tf < tc && frames.Count < nFrames)
+                ttf = (float)step;
+                while (tc < tf)
                 {
-                    Move(particlesArr, (float) step);
-                    frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
-                    t = tf;
-                    tf += step;
-                }
-
-                if (frames.Count >= nFrames)
-                {
-                    break;
-                }
-
-                while (tf > tc)
-                {
-                    tbc = (float)(tc - t);
-                    Move(particlesArr, tbc);
-                    t += tbc;
+                    ttc = (float) (tc - t);
+                    Move(particlesArr, ttc);
                     ApplyCollision(c);
                     c = ComputeClosestCollision(particlesArr);
-                    tc = t + c?.Dt ?? double.MaxValue;
+                    t = tc;
+                    tc = tc + c?.Dt ?? double.MaxValue;
+                    ttf = (float)(tf - t);
                 }
-
-                Move(particlesArr, (float) (tf - t));
-                frames.Add(new Frame { Positions = particlesArr.Select(x => x.Pos).ToList() });
+                Move(particlesArr, ttf);
+                AddFrame(frames, particlesArr);
                 t = tf;
-                tf += step;
             }
 
             Debug.WriteLine($"Computed: {frames.Count} frames");
 
             return frames;
+        }
+
+        private static void AddFrame(List<Frame> frames, Particle[] particlesArr)
+        {
+            frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
         }
 
         private Collision ComputeClosestCollision(Particle[] particles)
@@ -168,7 +158,7 @@ namespace WindowsFormsApp1
 
         private double? CheckWallCollisionY(Vector2 r, Vector2 v)
         {
-            double? dt = 0;
+            double? dt;
             double si = 5; // sigma, radius
 
             if (v.Y > 0)
@@ -189,7 +179,7 @@ namespace WindowsFormsApp1
 
         private double? CheckWallCollisionX(Vector2 r, Vector2 v)
         {
-            double? dt = 0;
+            double? dt;
             double si = 5; // sigma, radius
 
             if (v.X > 0)
@@ -256,7 +246,7 @@ namespace WindowsFormsApp1
         {
             foreach (var particle in particles)
             {
-                particle.Pos = particle.Pos + Vector2.Multiply(particle.Vel, t);
+                particle.Pos += Vector2.Multiply(particle.Vel, t);
             }
         }
     }
