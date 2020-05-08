@@ -6,14 +6,20 @@ using System.Numerics;
 
 namespace WindowsFormsApp1
 {
-    public class Worker
+    public class WorkerArray
     {
         public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles)
         {
             var particlesArr = particles.ToArray();
             var frames = new List<Frame>();
 
-            Collision c;
+            var wallCollisions = new float?[particlesArr.Length][];
+            for (int i = 0; i < wallCollisions.Length; i++)
+            {
+                wallCollisions[i] = new float?[4];
+            }
+
+            CollisionArray c;
             float step; // seconds
             float t;   // time
             float tc;  // time of next collision
@@ -22,7 +28,7 @@ namespace WindowsFormsApp1
 
             step = (float)0.1;
             t = 0;
-            c = ComputeClosestCollision(particlesArr);
+            c = ComputeClosestCollision(particlesArr, wallCollisions);
             tc = t + c?.Dt ?? float.MaxValue;
 
             // tf - time of next frame
@@ -34,7 +40,7 @@ namespace WindowsFormsApp1
                     ttc = tc - t;
                     Move(particlesArr, ttc);
                     ApplyCollision(c);
-                    c = ComputeClosestCollision(particlesArr);
+                    c = ComputeClosestCollision(particlesArr, wallCollisions);
                     t = tc;
                     tc = tc + c?.Dt ?? float.MaxValue;
                     ttf = tf - t;
@@ -54,10 +60,10 @@ namespace WindowsFormsApp1
             frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
         }
 
-        private Collision ComputeClosestCollision(Particle[] particles)
+        private CollisionArray ComputeClosestCollision(Particle[] particles, float?[][] wallCollisions)
         {
             var ppc = ComputeClosestPpCollision(particles);
-            var pwc = ComputeClosestPwCollision(particles);
+            var pwc = ComputeClosestPwCollision(particles, wallCollisions);
             if (pwc != null && ppc != null)
             {
                 return pwc.Dt < ppc.Dt
@@ -77,9 +83,9 @@ namespace WindowsFormsApp1
         }
 
         // PP collision - particle - particle collision
-        private static Collision ComputeClosestPpCollision(Particle[] particles)
+        private static CollisionArray ComputeClosestPpCollision(Particle[] particles)
         {
-            var collisions = new List<Collision>();
+            var collisions = new List<CollisionArray>();
             foreach (var i in particles)
             {
                 foreach (var j in particles)
@@ -87,7 +93,7 @@ namespace WindowsFormsApp1
                     var dt = ComputeCollisionTime(i.Pos, i.Vel, j.Pos, j.Vel);
                     if (dt.HasValue)
                     {
-                        collisions.Add(new Collision(i, j, dt.Value));
+                        collisions.Add(new CollisionArray(i, j, dt.Value));
                     }
                 }
             }
@@ -129,37 +135,44 @@ namespace WindowsFormsApp1
         }
 
         // PW collision - particle - wall collision
-        private Collision ComputeClosestPwCollision(Particle[] particles)
+        private CollisionArray ComputeClosestPwCollision(Particle[] particles, float?[][] wallCollisions)
         {
             var xs = new List<(Particle i, Particle j, float Value)>();
             var ys = new List<(Particle i, Particle j, float Value)>();
 
-            foreach (var i in particles)
+            for (var j = 0; j < particles.Length; j++)
             {
-                var x = CheckWallCollisionX(i.Pos, i.Vel);
-                var y = CheckWallCollisionY(i.Pos, i.Vel);
-                if (x.HasValue)
+                var i = particles[j];
+                var c = wallCollisions[j];
+                SetXWallCollisions(i.Pos, i.Vel, c);
+                SetYWallCollisions(i.Pos, i.Vel, c);
+            }
+
+            int particleIndex = 0;
+            int wallIndex = 0;
+            float minDt = float.MaxValue;
+
+            for (var j = 0; j < particles.Length; j++)
+            {
+                for (int x = 0; x < 4; x++)
                 {
-                    xs.Add((i, null, x.Value));
-                }
-                if (y.HasValue)
-                {
-                    ys.Add((i, null, y.Value));
+                    if (wallCollisions[j][x] != null && wallCollisions[j][x] < minDt)
+                    {
+                        particleIndex = j;
+                        wallIndex = x;
+                        minDt = wallCollisions[j][x].Value;
+                    }
                 }
             }
 
-            var xss = xs
-                .Where(x => x.Value > 0)
-                .Select(x => new Collision(x.i, x.Value, isWallCollision: true, wall: "x"));
-            var yss = ys
-                .Where(x => x.Value > 0)
-                .Select(x => new Collision(x.i, x.Value, isWallCollision: true, wall: "y"));
-            var closestWallCollision = xss.Concat(yss).OrderBy(x => x.Dt).FirstOrDefault();
-
-            return closestWallCollision;
+            if (wallIndex == 0 || wallIndex == 1)
+            {
+                return new CollisionArray(particles[particleIndex], minDt, true, "x");
+            }
+            return new CollisionArray(particles[particleIndex], minDt, true, "y");
         }
 
-        private float? CheckWallCollisionY(Vector2 r, Vector2 v)
+        private void SetYWallCollisions(Vector2 r, Vector2 v, float?[] c)
         {
             float? dt;
             float si = 5; // sigma, radius
@@ -167,20 +180,23 @@ namespace WindowsFormsApp1
             if (v.Y > 0)
             {
                 dt = (400 - si - r.Y) / v.Y;
+                c[2] = null;
+                c[3] = (float)dt;
             }
             else if (v.Y < 0)
             {
                 dt = (si - r.Y) / v.Y;
+                c[2] = (float)dt;
+                c[3] = null;
             }
             else //v.Y == 0
             {
-                dt = null;
+                c[2] = null;
+                c[3] = null;
             }
-
-            return dt;
         }
 
-        private float? CheckWallCollisionX(Vector2 r, Vector2 v)
+        private void SetXWallCollisions(Vector2 r, Vector2 v, float?[] c)
         {
             float? dt;
             float si = 5; // sigma, radius
@@ -188,20 +204,23 @@ namespace WindowsFormsApp1
             if (v.X > 0)
             {
                 dt = (700 - si - r.X) / v.X;
+                c[0] = null;
+                c[1] = (float)dt;
             }
             else if (v.X < 0)
             {
                 dt = (si - r.X) / v.X;
+                c[0] = (float)dt;
+                c[1] = null;
             }
-            else //v.Y == 0
+            else //v.X == 0
             {
-                dt = null;
+                c[0] = null;
+                c[1] = null;
             }
-
-            return dt;
         }
 
-        private void ApplyCollision(Collision c)
+        private void ApplyCollision(CollisionArray c)
         {
             if (!c.IsWallCollision)
             {
@@ -251,6 +270,31 @@ namespace WindowsFormsApp1
             {
                 particle.Pos += Vector2.Multiply(particle.Vel, t);
             }
+        }
+    }
+
+    internal class CollisionArray
+    {
+        public Particle ParticleI { get; }
+        public Particle ParticleJ { get; }
+        public float Dt { get; }
+        public bool IsWallCollision { get; }
+        public string Wall { get; }
+
+        public CollisionArray(Particle particleI, float dt, bool isWallCollision, string wall)
+        {
+            ParticleI = particleI;
+            Dt = dt;
+            IsWallCollision = isWallCollision;
+            Wall = wall;
+        }
+
+        public CollisionArray(Particle particleI, Particle particleJ, float dt)
+        {
+            ParticleI = particleI;
+            ParticleJ = particleJ;
+            Dt = dt;
+            IsWallCollision = false;
         }
     }
 }

@@ -6,5 +6,15 @@ namespace WindowsFormsApp1
     {
         public Vector2 Pos { get; set; }
         public Vector2 Vel { get; set; }
+
+        public Particle Clone()
+        {
+            return new Particle {Pos = Pos, Vel = Vel};
+        }
+
+        public override string ToString()
+        {
+            return $"{Pos} {Vel}";
+        }
     }
 }

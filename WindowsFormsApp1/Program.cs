@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using System.Numerics;
+using System.Xml.Serialization;
 using Timer = System.Threading.Timer;
 
 namespace WindowsFormsApp1
@@ -22,24 +26,92 @@ namespace WindowsFormsApp1
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            var nFrames = 2000;
+
+            List<Particle> particles;
+            if (File.Exists("input.xml"))
+            {
+                particles = ReadFromFile("input.xml");
+            }
+            else
+            {
+                particles = ParticlesGenerator.RandomParticles(20);
+                var fastParticles = ParticlesGenerator.RandomFastParticles(10);
+                particles.AddRange(fastParticles);
+                DumpToFile(particles, $"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.xml");
+            }
+
+            //particles = particles.Skip(1).Take(1).ToList();
+
+            var particlesClone = particles.Select(x => x.Clone()).ToList();
+
+            Comapre(particles, particlesClone);
+
             var w = new Worker();
-            var nFrames = 100;
-
-            var particles = ParticlesGenerator.RandomParticles(20);
-            var fastParticles = ParticlesGenerator.RandomFastParticles(10);
-            particles.AddRange(fastParticles);
-
             var frames = w.Simulate(nFrames, particles);
+
+            var wa = new WorkerArray();
+            var framesA = wa.Simulate(nFrames, particlesClone);
+
+            Compare(frames, framesA);
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
             _mainForm.TrackBar1.Maximum = nFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
-            _frames = frames;
+            _frames = framesA;
             Timer t = new Timer(PrintFrames, (_mainForm, _frames), nFrames, int.MaxValue);
 
             Application.Run(_mainForm);
+        }
+
+        private static List<Particle> ReadFromFile(string fileName)
+        {
+            XmlSerializer ser = new XmlSerializer(typeof(List<Particle>));
+            using (var reader = new StreamReader(fileName))
+            {
+                var deserialize = ser.Deserialize(reader);
+                reader.Close();
+                return (List<Particle>) deserialize;
+            }
+        }
+
+        private static void DumpToFile(List<Particle> particles, string fileName)
+        {
+            XmlSerializer ser = new XmlSerializer(typeof(List<Particle>));
+            TextWriter writer = new StreamWriter(fileName);
+            ser.Serialize(writer, particles);
+            writer.Close();
+        }
+
+        private static void Comapre(List<Particle> particles, List<Particle> particlesClone)
+        {
+            for (int i = 0; i < particles.Count; i++)
+            {
+                Particle a = particles[i];
+                Particle b = particlesClone[i];
+                if (a.Pos != b.Pos || a.Vel != b.Vel)
+                {
+                    Console.WriteLine("diff particles");
+                }
+            }
+        }
+
+        private static void Compare(List<Frame> frames, List<Frame> framesA)
+        {
+            for (int i = 0; i < frames.Count; i++)
+            {
+                for (int j = 0; j < frames[i].Positions.Count; j++)
+                {
+                    var a = frames[i].Positions[j];
+                    var b = framesA[i].Positions[j];
+                    if ((a - b).Length() > Single.Epsilon)
+                    {
+                        Console.WriteLine("diff!");
+                    }
+                }
+            }
         }
 
         private static void TrackBar1_Scroll(object sender, EventArgs e)
@@ -70,7 +142,7 @@ namespace WindowsFormsApp1
 
         private static Bitmap Print(IEnumerable<Vector2> positions)
         {
-            Bitmap bitmap = new Bitmap(700, 400);
+            Bitmap bitmap = new Bitmap(750, 450);
             Graphics flagGraphics = Graphics.FromImage(bitmap);
 
             foreach (var p in positions)

@@ -8,10 +8,10 @@ namespace WindowsFormsApp1
     {
         public static List<Particle> RandomParticles(int count)
         {
-            var xPosMin = 0;
+            var xPosMin = 6;
             var xPosMax = 200;
 
-            var yPosMin = 0;
+            var yPosMin = 6;
             var yPosMax = 200;
 
             var random = new Random(DateTimeOffset.UtcNow.Millisecond);
@@ -36,7 +36,7 @@ namespace WindowsFormsApp1
             {
                 particles.Add(new Particle
                 {
-                    Pos = new Vector2(800, i * 20),
+                    Pos = new Vector2(800, (i + 1) * 10),
                     Vel = new Vector2(-20, 0)
                 });
             }
