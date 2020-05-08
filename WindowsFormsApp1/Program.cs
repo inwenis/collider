@@ -147,7 +147,7 @@ namespace WindowsFormsApp1
 
             foreach (var p in positions)
             {
-                flagGraphics.FillEllipse(Brushes.Aqua, p.X, p.Y, 10, 10);
+                flagGraphics.FillEllipse(Brushes.Aqua, p.X - 5, p.Y - 5, 10, 10);
             }
 
             return bitmap;
