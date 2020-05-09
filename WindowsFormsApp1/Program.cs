@@ -38,7 +38,7 @@ namespace WindowsFormsApp1
                 particles = ParticlesGenerator.RandomParticles(20);
                 var fastParticles = ParticlesGenerator.RandomFastParticles(10);
                 particles.AddRange(fastParticles);
-                DumpToFile(particles, $"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.xml");
+                DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
             //particles = particles.Skip(1).Take(1).ToList();
