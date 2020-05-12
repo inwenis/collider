@@ -41,7 +41,7 @@ namespace WindowsFormsApp1
                 DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
-            //particles = particles.Skip(1).Take(1).ToList();
+            //particles = particles.Take(2).ToList();
 
             var particlesClone = particles.Select(x => x.Clone()).ToList();
 
@@ -77,7 +77,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void DumpToFile(List<Particle> particles, string fileName)
+        public static void DumpToFile(List<Particle> particles, string fileName)
         {
             XmlSerializer ser = new XmlSerializer(typeof(List<Particle>));
             TextWriter writer = new StreamWriter(fileName);
@@ -106,7 +106,7 @@ namespace WindowsFormsApp1
                 {
                     var a = frames[i].Positions[j];
                     var b = framesA[i].Positions[j];
-                    if ((a - b).Length() > Single.Epsilon)
+                    if ((a - b).Length() > 0.001)
                     {
                         Console.WriteLine("diff!");
                     }
