@@ -42,8 +42,6 @@ namespace WindowsFormsApp1
 
             var particlesClone = particles.Select(x => x.Clone()).ToList();
 
-            Compare(particles, particlesClone);
-
             var w = new Worker();
             var frames = w.Simulate(nFrames, particles);
 
@@ -80,19 +78,6 @@ namespace WindowsFormsApp1
             TextWriter writer = new StreamWriter(fileName);
             ser.Serialize(writer, particles);
             writer.Close();
-        }
-
-        private static void Compare(List<Particle> particles, List<Particle> particlesClone)
-        {
-            for (int i = 0; i < particles.Count; i++)
-            {
-                Particle a = particles[i];
-                Particle b = particlesClone[i];
-                if (a.Pos != b.Pos || a.Vel != b.Vel)
-                {
-                    Console.WriteLine("diff particles");
-                }
-            }
         }
 
         private static void Compare(List<Frame> frames, List<Frame> framesA)
