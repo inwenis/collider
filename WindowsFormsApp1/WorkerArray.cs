@@ -32,12 +32,9 @@ namespace WindowsFormsApp1
             SetAllPwCollisions(particlesArr, wallCollisions, t);
             c = ComputeClosestCollision(particlesArr, wallCollisions, t);
             tc = t + c?.Dt ?? float.MaxValue;
-            int frameNumber = 0;
             // tf - time of next frame
             foreach (var tf in Enumerable.Range(0, nFrames).Select(x => x * step))
             {
-                var line = Worker.Line(frameNumber, c);
-                File.AppendAllText("array.txt", line);
                 ttf = tf - t;
                 while (tc < tf)
                 {
@@ -52,7 +49,6 @@ namespace WindowsFormsApp1
                 Move(particlesArr, ttf);
                 AddFrame(frames, particlesArr);
                 t = tf;
-                frameNumber++;
             }
 
             Debug.WriteLine($"Computed: {frames.Count} frames");
@@ -91,16 +87,14 @@ namespace WindowsFormsApp1
         private static Collision ComputeClosestPpCollision(Particle[] particles)
         {
             var collisions = new List<Collision>();
-            for (var k = 0; k < particles.Length; k++)
+            for (var i = 0; i < particles.Length; i++)
             {
-                var i = particles[k];
-                for (var l = 0; l < particles.Length; l++)
+                for (var j = 0; j < particles.Length; j++)
                 {
-                    var j = particles[l];
-                    var dt = ComputeCollisionTime(i.Pos, i.Vel, j.Pos, j.Vel);
+                    var dt = ComputeCollisionTime(particles[i].Pos, particles[i].Vel, particles[j].Pos, particles[j].Vel);
                     if (dt.HasValue)
                     {
-                        collisions.Add(new Collision(i, k, j, l, dt.Value));
+                        collisions.Add(new Collision(particles[i], i, particles[j], j, dt.Value));
                     }
                 }
             }

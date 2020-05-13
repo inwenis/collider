@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -41,11 +40,9 @@ namespace WindowsFormsApp1
                 DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
-            //particles = particles.Take(2).ToList();
-
             var particlesClone = particles.Select(x => x.Clone()).ToList();
 
-            Comapre(particles, particlesClone);
+            Compare(particles, particlesClone);
 
             var w = new Worker();
             var frames = w.Simulate(nFrames, particles);
@@ -60,7 +57,7 @@ namespace WindowsFormsApp1
             _mainForm.TrackBar1.Maximum = nFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
-            _frames = framesA;
+            _frames = frames;
             Timer t = new Timer(PrintFrames, (_mainForm, _frames), nFrames, int.MaxValue);
 
             Application.Run(_mainForm);
@@ -85,7 +82,7 @@ namespace WindowsFormsApp1
             writer.Close();
         }
 
-        private static void Comapre(List<Particle> particles, List<Particle> particlesClone)
+        private static void Compare(List<Particle> particles, List<Particle> particlesClone)
         {
             for (int i = 0; i < particles.Count; i++)
             {
@@ -108,7 +105,7 @@ namespace WindowsFormsApp1
                     var b = framesA[i].Positions[j];
                     if ((a - b).Length() > 0.001)
                     {
-                        Console.WriteLine("diff!");
+                        Console.WriteLine("diff in frame!");
                     }
                 }
             }

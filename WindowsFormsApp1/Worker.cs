@@ -25,12 +25,9 @@ namespace WindowsFormsApp1
             t = 0;
             c = ComputeClosestCollision(particlesArr);
             tc = t + c?.Dt ?? float.MaxValue;
-            int frameNumber = 0;
             // tf - time of next frame
             foreach (var tf in Enumerable.Range(0, nFrames).Select(x => x * step))
             {
-                var line = Line(frameNumber, c);
-                File.AppendAllText("noarray.txt", line);
                 ttf = tf - t;
                 while (tc < tf)
                 {
@@ -45,24 +42,11 @@ namespace WindowsFormsApp1
                 Move(particlesArr, ttf);
                 AddFrame(frames, particlesArr);
                 t = tf;
-                frameNumber++;
             }
 
             Debug.WriteLine($"Computed: {frames.Count} frames");
 
             return frames;
-        }
-
-        public static string Line(int frameNumber, Collision c)
-        {
-            if (c.IsWallCollision)
-            {
-                return $"{frameNumber} next collision between {c.IndexI:00}/ {c.Wall} in {c?.Dt.ToString("F3") ?? "0"}\n";
-            }
-            else
-            {
-                return $"{frameNumber} next collision between {c.IndexI:00}/{c.IndexJ:00} in {c?.Dt.ToString("F3") ?? "0"}\n";
-            }
         }
 
         private static void AddFrame(List<Frame> frames, Particle[] particlesArr)
@@ -96,16 +80,14 @@ namespace WindowsFormsApp1
         private static Collision ComputeClosestPpCollision(Particle[] particles)
         {
             var collisions = new List<Collision>();
-            for (var index = 0; index < particles.Length; index++)
+            for (var i = 0; i < particles.Length; i++)
             {
-                var i = particles[index];
-                for (var index1 = 0; index1 < particles.Length; index1++)
+                for (var j = 0; j < particles.Length; j++)
                 {
-                    var j = particles[index1];
-                    var dt = ComputeCollisionTime(i.Pos, i.Vel, j.Pos, j.Vel);
+                    var dt = ComputeCollisionTime(particles[i].Pos, particles[i].Vel, particles[j].Pos, particles[j].Vel);
                     if (dt.HasValue)
                     {
-                        collisions.Add(new Collision(i, index, j, index1, dt.Value));
+                        collisions.Add(new Collision(particles[i], i, particles[j], j, dt.Value));
                     }
                 }
             }
@@ -149,32 +131,29 @@ namespace WindowsFormsApp1
         // PW collision - particle - wall collision
         private Collision ComputeClosestPwCollision(Particle[] particles)
         {
-            var xs = new List<(Particle i, Particle j, float Value)>();
-            var ys = new List<(Particle i, Particle j, float Value)>();
+            var xs = new List<Collision>();
+            var ys = new List<Collision>();
 
-            foreach (var i in particles)
+            for (var i = 0; i < particles.Length; i++)
             {
-                var x = CheckWallCollisionX(i.Pos, i.Vel);
-                var y = CheckWallCollisionY(i.Pos, i.Vel);
+                var x = CheckWallCollisionX(particles[i].Pos, particles[i].Vel);
+                var y = CheckWallCollisionY(particles[i].Pos, particles[i].Vel);
                 if (x.HasValue)
                 {
-                    xs.Add((i, null, x.Value));
+                    xs.Add(new Collision(particles[i], i, x.Value, true, "x"));
                 }
+
                 if (y.HasValue)
                 {
-                    ys.Add((i, null, y.Value));
+                    ys.Add(new Collision(particles[i], i, y.Value, true, "y"));
                 }
             }
 
-            var list = particles.ToList();
-
-            var xss = xs
-                .Where(x => x.Value > 0)
-                .Select(x => new Collision(x.i, list.IndexOf(x.i), x.Value, isWallCollision: true, wall: "x"));
-            var yss = ys
-                .Where(x => x.Value > 0)
-                .Select(x => new Collision(x.i, list.IndexOf(x.i), x.Value, isWallCollision: true, wall: "y"));
-            var closestWallCollision = xss.Concat(yss).OrderBy(x => x.Dt).FirstOrDefault();
+            var closestWallCollision = new Collision[] { }
+                .Concat(xs.Where(x => x.Dt > 0))
+                .Concat(ys.Where(x => x.Dt > 0))
+                .OrderBy(x => x.Dt)
+                .FirstOrDefault();
 
             return closestWallCollision;
         }
