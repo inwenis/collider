@@ -33,7 +33,13 @@ namespace Tests
             var wa = new WorkerArray();
             var framesA = wa.Simulate(nFrames, particlesClone);
 
-            Tools.Compare(frames, framesA);
+            var (framesWithDifferences, framesComparisons) = Tools.Compare(frames, framesA);
+
+            Console.WriteLine($"First diff in frame {framesWithDifferences.First()}");
+            foreach (var framesComparison in framesComparisons.OrderBy(x => x.Key).Select(x => x.Value))
+            {
+                Console.WriteLine($"{framesComparison.TotalDiff}");
+            }
         }
     }
 }
