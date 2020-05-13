@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using System.Numerics;
@@ -39,22 +38,14 @@ namespace WindowsFormsApp1
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
-            var particlesClone = particles.Select(x => x.Clone()).ToList();
-
-            var w = new Worker();
-            var frames = w.Simulate(nFrames, particles);
-
-            var wa = new WorkerArray();
-            var framesA = wa.Simulate(nFrames, particlesClone);
-
-            Tools.Compare(frames, framesA);
-
+            var w = new WorkerArray();
+            
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
             _mainForm.TrackBar1.Maximum = nFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
-            _frames = frames;
+            _frames = w.Simulate(nFrames, particles);
             Timer t = new Timer(PrintFrames, null, nFrames, int.MaxValue);
 
             Application.Run(_mainForm);
