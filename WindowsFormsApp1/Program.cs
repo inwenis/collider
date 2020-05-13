@@ -48,7 +48,7 @@ namespace WindowsFormsApp1
             var wa = new WorkerArray();
             var framesA = wa.Simulate(nFrames, particlesClone);
 
-            Compare(frames, framesA);
+            Tools.Compare(frames, framesA);
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
@@ -78,22 +78,6 @@ namespace WindowsFormsApp1
             TextWriter writer = new StreamWriter(fileName);
             ser.Serialize(writer, particles);
             writer.Close();
-        }
-
-        private static void Compare(List<Frame> frames, List<Frame> framesA)
-        {
-            for (int i = 0; i < frames.Count; i++)
-            {
-                for (int j = 0; j < frames[i].Positions.Count; j++)
-                {
-                    var a = frames[i].Positions[j];
-                    var b = framesA[i].Positions[j];
-                    if ((a - b).Length() > 0.001)
-                    {
-                        Console.WriteLine("diff in frame!");
-                    }
-                }
-            }
         }
 
         private static void TrackBar1_Scroll(object sender, EventArgs e)
