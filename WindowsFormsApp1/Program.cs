@@ -64,7 +64,7 @@ namespace WindowsFormsApp1
         {
             var trackBar = (TrackBar) sender;
             var frame = _frames[trackBar.Value];
-            _mainForm.PictureBox1.Image = Print(frame.Positions);
+            _mainForm.PictureBox1.Image = PrintFrame(frame.Positions);
         }
 
         private static void PrintFrames(object obj)
@@ -75,7 +75,7 @@ namespace WindowsFormsApp1
             {
                 _mainForm.PictureBox1.Invoke((MethodInvoker)delegate {
                     // Running on the UI thread
-                    _mainForm.PictureBox1.Image = Print(frame.Positions);
+                    _mainForm.PictureBox1.Image = PrintFrame(frame.Positions);
                     _mainForm.Label1.Text = frameNumber.ToString();
                     _mainForm.TrackBar1.Value = frameNumber;
                 });
@@ -84,7 +84,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static Bitmap Print(IEnumerable<Vector2> positions)
+        private static Bitmap PrintFrame(IEnumerable<Vector2> positions)
         {
             Bitmap bitmap = new Bitmap(750, 450);
             Graphics flagGraphics = Graphics.FromImage(bitmap);
