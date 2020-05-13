@@ -58,7 +58,7 @@ namespace WindowsFormsApp1
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
             _frames = frames;
-            Timer t = new Timer(PrintFrames, (_mainForm, _frames), nFrames, int.MaxValue);
+            Timer t = new Timer(PrintFrames, null, nFrames, int.MaxValue);
 
             Application.Run(_mainForm);
         }
@@ -120,17 +120,15 @@ namespace WindowsFormsApp1
 
         private static void PrintFrames(object obj)
         {
-            var (form1, frames) = ((Form1, List<Frame>)) obj;
-
             int frameNumber = 0;
 
-            foreach (var frame in frames)
+            foreach (var frame in _frames)
             {
-                form1.PictureBox1.Invoke((MethodInvoker)delegate {
+                _mainForm.PictureBox1.Invoke((MethodInvoker)delegate {
                     // Running on the UI thread
-                    form1.PictureBox1.Image = Print(frame.Positions);
-                    form1.Label1.Text = frameNumber.ToString();
-                    form1.TrackBar1.Value = frameNumber;
+                    _mainForm.PictureBox1.Image = Print(frame.Positions);
+                    _mainForm.Label1.Text = frameNumber.ToString();
+                    _mainForm.TrackBar1.Value = frameNumber;
                 });
                 Thread.Sleep(TimeSpan.FromSeconds(0.01));
                 frameNumber++;
