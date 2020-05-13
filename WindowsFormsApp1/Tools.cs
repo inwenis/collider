@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 using WindowsFormsApp1;
 
-static internal class Tools
+public static class Tools
 {
     public static void Compare(List<Frame> framesA, List<Frame> framesB)
     {
@@ -18,6 +20,25 @@ static internal class Tools
                     Console.WriteLine($"diff in frame {i}");
                 }
             }
+        }
+    }
+
+    public static void DumpToFile(List<Particle> particles, string fileName)
+    {
+        XmlSerializer ser = new XmlSerializer(typeof(List<Particle>));
+        TextWriter writer = new StreamWriter(fileName);
+        ser.Serialize(writer, particles);
+        writer.Close();
+    }
+
+    public static List<Particle> ReadFromFile(string fileName)
+    {
+        XmlSerializer ser = new XmlSerializer(typeof(List<Particle>));
+        using (var reader = new StreamReader(fileName))
+        {
+            var deserialize = ser.Deserialize(reader);
+            reader.Close();
+            return (List<Particle>) deserialize;
         }
     }
 }

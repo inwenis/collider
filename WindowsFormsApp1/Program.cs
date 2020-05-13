@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using System.Numerics;
-using System.Xml.Serialization;
 using Timer = System.Threading.Timer;
 
 namespace WindowsFormsApp1
@@ -30,14 +29,14 @@ namespace WindowsFormsApp1
             List<Particle> particles;
             if (File.Exists("input.xml"))
             {
-                particles = ReadFromFile("input.xml");
+                particles = Tools.ReadFromFile("input.xml");
             }
             else
             {
                 particles = ParticlesGenerator.RandomParticles(20);
                 var fastParticles = ParticlesGenerator.RandomFastParticles(10);
                 particles.AddRange(fastParticles);
-                DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
+                Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
             var particlesClone = particles.Select(x => x.Clone()).ToList();
@@ -59,25 +58,6 @@ namespace WindowsFormsApp1
             Timer t = new Timer(PrintFrames, null, nFrames, int.MaxValue);
 
             Application.Run(_mainForm);
-        }
-
-        private static List<Particle> ReadFromFile(string fileName)
-        {
-            XmlSerializer ser = new XmlSerializer(typeof(List<Particle>));
-            using (var reader = new StreamReader(fileName))
-            {
-                var deserialize = ser.Deserialize(reader);
-                reader.Close();
-                return (List<Particle>) deserialize;
-            }
-        }
-
-        public static void DumpToFile(List<Particle> particles, string fileName)
-        {
-            XmlSerializer ser = new XmlSerializer(typeof(List<Particle>));
-            TextWriter writer = new StreamWriter(fileName);
-            ser.Serialize(writer, particles);
-            writer.Close();
         }
 
         private static void TrackBar1_Scroll(object sender, EventArgs e)

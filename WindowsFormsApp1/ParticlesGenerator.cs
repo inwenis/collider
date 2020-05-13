@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace WindowsFormsApp1
 {
-    internal static class ParticlesGenerator
+    public static class ParticlesGenerator
     {
         public static List<Particle> RandomParticles(int count)
         {
