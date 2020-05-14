@@ -27,15 +27,23 @@ namespace Tests
 
             var particlesClone = particles.Select(x => x.Clone()).ToList();
 
-            var w = new Worker();
-            var frames = w.Simulate(nFrames, particles);
-
             var wa = new WorkerArray();
-            var framesA = wa.Simulate(nFrames, particlesClone);
+            var framesA = wa.Simulate(nFrames, particles);
 
-            var (framesWithDifferences, framesComparisons) = Tools.Compare(frames, framesA);
+            var wb = new WorkerArray2();
+            var framesB = wb.Simulate(nFrames, particlesClone);
 
-            Console.WriteLine($"First diff in frame {framesWithDifferences.First()}");
+            var (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
+
+            if (framesWithDifferences.Any())
+            {
+                Console.WriteLine($"First diff in frame {framesWithDifferences.First()}");
+            }
+            else
+            {
+                Console.WriteLine("No diff");
+            }
+            
             foreach (var framesComparison in framesComparisons.OrderBy(x => x.Key).Select(x => x.Value))
             {
                 Console.WriteLine($"{framesComparison.TotalDiff}");
