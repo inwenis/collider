@@ -8,20 +8,14 @@ namespace WindowsFormsApp1
     {
         public static List<Particle> RandomParticles(int count)
         {
-            var xPosMin = 6;
-            var xPosMax = 200;
-
-            var yPosMin = 6;
-            var yPosMax = 200;
-
             var random = new Random(DateTimeOffset.UtcNow.Millisecond);
             var list = new List<Particle>();
             for (int i = 0; i < count; i++)
             {
                 var particle = new Particle
                 {
-                    Pos = new Vector2(random.Next(xPosMin, xPosMax), random.Next(yPosMin, yPosMax)),
-                    Vel = new Vector2((float) random.NextDouble(-2.5, 2.5), (float)random.NextDouble(-2.5, 2.5))
+                    Pos = random.NextVector2(6, 200, 6, 200),
+                    Vel = random.NextVector2(-2.5, 2.5, -2.5, 2.5)
                 };
                 list.Add(particle);
             }
