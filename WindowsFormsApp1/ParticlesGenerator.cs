@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace WindowsFormsApp1
@@ -14,13 +15,26 @@ namespace WindowsFormsApp1
             {
                 var particle = new Particle
                 {
-                    Pos = random.NextVector2(6, 200, 6, 200),
+                    Pos = NextNonCollidingPosition(random, list),
                     Vel = random.NextVector2(-2.5, 2.5, -2.5, 2.5)
                 };
                 list.Add(particle);
             }
 
             return list;
+        }
+
+        private static Vector2 NextNonCollidingPosition(Random random, List<Particle> existingParticles)
+        {
+            Vector2 position;
+            const int sigma = 5;
+            const int nonCollidingDistance = 2 * sigma + 1; // +1 is added to make sure particles do not overlap
+            do
+            {
+                position = random.NextVector2(6, 200, 6, 200);
+            } while (existingParticles.Any(x => (x.Pos - position).Length() < nonCollidingDistance));
+
+            return position;
         }
 
         public static List<Particle> RandomFastParticles(int count)
