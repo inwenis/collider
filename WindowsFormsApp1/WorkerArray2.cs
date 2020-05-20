@@ -81,14 +81,8 @@ namespace WindowsFormsApp1
         // PP collision - particle - particle collision
         private static Collision ComputeClosestPpCollision(Particle[] particles)
         {
-            float?[][] arr = new float?[particles.Length][];
-            for (int i = 0; i < particles.Length; i++)
-            {
-                arr[i] = new float?[particles.Length];
-            }
+            var arr = Array2D.Create<float?>(particles.Length, particles.Length);
 
-
-            var collisions = new List<Collision>();
             for (var i = 0; i < particles.Length; i++)
             {
                 for (var j = 0; j < particles.Length; j++)
@@ -96,10 +90,6 @@ namespace WindowsFormsApp1
                     var dt = ComputeCollisionTime(particles[i].Pos, particles[i].Vel, particles[j].Pos, particles[j].Vel);
                     arr[i][j] = dt;
                     arr[j][i] = dt;
-                    if (dt.HasValue)
-                    {
-                        collisions.Add(new Collision(particles[i], i, particles[j], j, dt.Value));
-                    }
                 }
             }
 
