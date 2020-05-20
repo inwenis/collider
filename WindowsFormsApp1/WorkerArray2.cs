@@ -13,11 +13,7 @@ namespace WindowsFormsApp1
             var particlesArr = particles.ToArray();
             var frames = new List<Frame>();
 
-            var wallCollisions = new float?[particlesArr.Length][];
-            for (int i = 0; i < wallCollisions.Length; i++)
-            {
-                wallCollisions[i] = new float?[4];
-            }
+            var wallCollisions = Array2D.Create<float?>(particlesArr.Length, 4);
 
             Collision c;
             float step; // seconds
