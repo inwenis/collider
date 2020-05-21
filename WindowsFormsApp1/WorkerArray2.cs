@@ -72,7 +72,19 @@ namespace WindowsFormsApp1
             var ppc = FindClosestPpCollision(particles, ppCollisions);
             var ppcfo = FindClosestPpCollision(particles, ppCollisionsFromOutside);
 
-            if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ)
+            if (ppc == null && ppcfo == null)
+            {
+                // ok
+            }
+            else if (ppc == null)
+            {
+                Console.WriteLine($"{frameNumber} diff");
+            }
+            else if (ppcfo == null)
+            {
+                Console.WriteLine($"{frameNumber} diff");
+            }
+            else if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ)
             {
                 Console.WriteLine($"{frameNumber} diff");
             }
@@ -103,6 +115,7 @@ namespace WindowsFormsApp1
             var minI = 0;
             var minJ = 0;
             var minDt = float.MaxValue;
+            var collisionExists = false;
             for (var i = 0; i < particles.Length; i++)
             {
                 for (var j = i + 1; j < particles.Length; j++)
@@ -112,11 +125,14 @@ namespace WindowsFormsApp1
                         minI = i;
                         minJ = j;
                         minDt = ppCollisions[i][j].Value;
+                        collisionExists = true;
                     }
                 }
             }
 
-            return new Collision(particles[minI], minI, particles[minJ], minJ, minDt);
+            return collisionExists
+                ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt)
+                : null;
         }
 
         private static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions)
