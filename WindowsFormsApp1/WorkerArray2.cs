@@ -146,6 +146,11 @@ namespace WindowsFormsApp1
                     ppCollisions[j][i] = dt;
                 }
             }
+
+            for (int i = 0; i < particles.Length; i++)
+            {
+                ppCollisions[i][i] = null;
+            }
         }
 
         private static float? ComputeCollisionTime(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
@@ -315,7 +320,7 @@ namespace WindowsFormsApp1
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
                     var dt = ComputeCollisionTime(i.Pos, i.Vel, particles[k].Pos, particles[k].Vel);
-                    dt = dt.HasValue ? dt + t : t;
+                    dt = dt.HasValue ? dt + t : null;
                     ppCollisions[c.IndexI][k] = dt;
                     ppCollisions[k][c.IndexI] = dt;
                 }
@@ -323,10 +328,13 @@ namespace WindowsFormsApp1
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
                     var dt = ComputeCollisionTime(j.Pos, j.Vel, particles[k].Pos, particles[k].Vel);
-                    dt = dt.HasValue ? dt + t : t;
+                    dt = dt.HasValue ? dt + t : null;
                     ppCollisions[c.IndexJ][k] = dt;
                     ppCollisions[k][c.IndexJ] = dt;
                 }
+
+                ppCollisions[c.IndexI][c.IndexI] = null;
+                ppCollisions[c.IndexJ][c.IndexJ] = null;
             }
             else if (c.IsWallCollision && c.Wall == "x")
             {
@@ -337,10 +345,12 @@ namespace WindowsFormsApp1
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
                     var dt = ComputeCollisionTime(c.ParticleI.Pos, c.ParticleI.Vel, particles[k].Pos, particles[k].Vel);
-                    dt = dt.HasValue ? dt + t : t;
+                    dt = dt.HasValue ? dt + t : null;
                     ppCollisions[c.IndexI][k] = dt;
                     ppCollisions[k][c.IndexI] = dt;
                 }
+
+                ppCollisions[c.IndexI][c.IndexI] = null;
             }
             else if (c.IsWallCollision && c.Wall == "y")
             {
@@ -351,10 +361,12 @@ namespace WindowsFormsApp1
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
                     var dt = ComputeCollisionTime(c.ParticleI.Pos, c.ParticleI.Vel, particles[k].Pos, particles[k].Vel);
-                    dt = dt.HasValue ? dt + t : t;
+                    dt = dt.HasValue ? dt + t : null;
                     ppCollisions[c.IndexI][k] = dt;
                     ppCollisions[k][c.IndexI] = dt;
                 }
+
+                ppCollisions[c.IndexI][c.IndexI] = null;
             }
         }
 
