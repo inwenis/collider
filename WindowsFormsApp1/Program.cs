@@ -25,7 +25,7 @@ namespace WindowsFormsApp1
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var nFrames = 2000;
+            var nFrames = 12000;
 
             List<Particle> particles;
             if (File.Exists("input.xml"))
@@ -34,9 +34,7 @@ namespace WindowsFormsApp1
             }
             else
             {
-                particles = ParticlesGenerator.RandomParticles(20);
-                var fastParticles = ParticlesGenerator.RandomFastParticles(10);
-                particles.AddRange(fastParticles);
+                particles = ParticlesGenerator.RandomParticles(2);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 

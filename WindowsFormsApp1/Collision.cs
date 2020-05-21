@@ -4,7 +4,7 @@
     {
         public Particle ParticleI { get; }
         public Particle ParticleJ { get; }
-        public float Dt { get; }
+        public float Dt { get; set; }
         public bool IsWallCollision { get; }
         public string Wall { get; }
         public int IndexI { get; set; }

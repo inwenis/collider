@@ -71,6 +71,10 @@ namespace WindowsFormsApp1
             // TODO here
             var ppc = FindClosestPpCollision(particles, ppCollisions);
             var ppcfo = FindClosestPpCollision(particles, ppCollisionsFromOutside);
+            if (ppcfo != null)
+            {
+                ppcfo.Dt -= t;
+            }
 
             if (ppc == null && ppcfo == null)
             {
@@ -84,11 +88,12 @@ namespace WindowsFormsApp1
             {
                 Console.WriteLine($"{frameNumber} diff");
             }
-            else if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ)
+            else if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ || Math.Abs(ppc.Dt - ppcfo.Dt) > 0.001)
             {
                 Console.WriteLine($"{frameNumber} diff");
             }
 
+            ppc = ppcfo;
             var pwc = FindClosestPwCollision(particles, pwCollisions, t);
             if (pwc != null && ppc != null)
             {

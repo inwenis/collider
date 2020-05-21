@@ -10,7 +10,7 @@ namespace Tests
     {
         static void Main(string[] args)
         {
-            var nFrames = 2000;
+            var nFrames = 6000;
 
             List<Particle> particles;
             if (File.Exists("input.xml"))
@@ -20,8 +20,6 @@ namespace Tests
             else
             {
                 particles = ParticlesGenerator.RandomParticles(20);
-                var fastParticles = ParticlesGenerator.RandomFastParticles(10);
-                particles.AddRange(fastParticles);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
@@ -44,10 +42,10 @@ namespace Tests
                 Console.WriteLine("No diff");
             }
             
-            foreach (var framesComparison in framesComparisons.OrderBy(x => x.Key).Select(x => x.Value))
-            {
-                Console.WriteLine($"{framesComparison.TotalDiff}");
-            }
+            //foreach (var framesComparison in framesComparisons.OrderBy(x => x.Key).Select(x => x.Value))
+            //{
+            //    Console.WriteLine($"{framesComparison.TotalDiff}");
+            //}
         }
     }
 }
