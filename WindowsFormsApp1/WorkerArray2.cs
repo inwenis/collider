@@ -67,8 +67,9 @@ namespace WindowsFormsApp1
         {
             var ppCollisions = Array2D.Create<float?>(particles.Length, particles.Length);
             SetAllPpCollisions(particles, ppCollisions);
-            var ppc = FindClosestPpCollision(particles, ppCollisions); // TODO here
             // one array keeps relative collision, one keeps absolute
+            // TODO here
+            var ppc = FindClosestPpCollision(particles, ppCollisions);
             var ppcfo = FindClosestPpCollision(particles, ppCollisionsFromOutside);
 
             if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ)
