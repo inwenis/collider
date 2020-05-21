@@ -64,6 +64,7 @@ namespace WindowsFormsApp1
             var frameA = _framesA[trackBar.Value];
             var frameB = _framesB[trackBar.Value];
             _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, frameB.Positions);
+            _mainForm.Label1.Text = trackBar.Value.ToString();
         }
 
         private static void PrintFrames(object obj)
