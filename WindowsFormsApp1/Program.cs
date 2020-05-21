@@ -39,14 +39,14 @@ namespace WindowsFormsApp1
             }
 
             var w = new WorkerArray();
-            
+
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
             _mainForm.TrackBar1.Maximum = nFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
             _frames = w.Simulate(nFrames, particles);
-            Timer t = new Timer(PrintFrames, null, nFrames, int.MaxValue);
+            Timer t = new Timer(PrintFrames, null, 0, int.MaxValue);
 
             Application.Run(_mainForm);
         }
