@@ -19,9 +19,9 @@ namespace Tests
             }
             else
             {
-                particles = ParticlesGenerator.RandomParticles(20);
-                var fastParticles = ParticlesGenerator.RandomFastParticles(10);
-                particles.AddRange(fastParticles);
+                particles = ParticlesGenerator.RandomParticles(2);
+                //var fastParticles = ParticlesGenerator.RandomFastParticles(10);
+                //particles.AddRange(fastParticles);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 

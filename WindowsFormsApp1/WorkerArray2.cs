@@ -63,7 +63,8 @@ namespace WindowsFormsApp1
         {
             var ppCollisions = Array2D.Create<float?>(particles.Length, particles.Length);
             SetAllPpCollisions(particles, ppCollisions);
-            var ppc = FindClosestPpCollision(particles, ppCollisions);
+            var ppc = FindClosestPpCollision(particles, ppCollisions); // TODO here
+            // one array keeps relative collision, one keeps absolute
             var ppcfo = FindClosestPpCollision(particles, ppCollisionsFromOutside);
 
             for (int i = 0; i < ppCollisionsFromOutside.Length; i++)
@@ -77,10 +78,10 @@ namespace WindowsFormsApp1
                 }
             }
 
-            //if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ)
-            //{
-            //    Console.WriteLine("diff");
-            //}
+            if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ)
+            {
+                Console.WriteLine("diff");
+            }
 
             var pwc = FindClosestPwCollision(particles, pwCollisions, t);
             if (pwc != null && ppc != null)
