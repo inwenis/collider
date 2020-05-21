@@ -27,11 +27,13 @@ namespace WindowsFormsApp1
             t = 0;
             SetAllPwCollisions(particlesArr, pwCollisions, t);
             SetAllPpCollisions(particlesArr, ppCollisions);
-            c = ComputeClosestCollision(particlesArr, pwCollisions, ppCollisions, t);
+            c = ComputeClosestCollision(particlesArr, pwCollisions, ppCollisions, t, 0);
             tc = t + c?.Dt ?? float.MaxValue;
             // tf - time of next frame
-            foreach (var tf in Enumerable.Range(0, nFrames).Select(x => x * step))
+            var timeOfFrames = Enumerable.Range(0, nFrames).Select(x => x * step).ToArray();
+            for (var i = 0; i < timeOfFrames.Length; i++)
             {
+                var tf = timeOfFrames[i];
                 ttf = tf - t;
                 while (tc < tf)
                 {
@@ -39,10 +41,11 @@ namespace WindowsFormsApp1
                     Move(particlesArr, ttc);
                     t = tc;
                     ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, t);
-                    c = ComputeClosestCollision(particlesArr, pwCollisions, ppCollisions, t);
+                    c = ComputeClosestCollision(particlesArr, pwCollisions, ppCollisions, t, i);
                     tc = tc + c?.Dt ?? float.MaxValue;
                     ttf = tf - t;
                 }
+
                 Move(particlesArr, ttf);
                 AddFrame(frames, particlesArr);
                 t = tf;
@@ -58,8 +61,9 @@ namespace WindowsFormsApp1
             frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
         }
 
-        private Collision ComputeClosestCollision(Particle[] particles, float?[][] pwCollisions, float?[][] ppCollisionsFromOutside,
-            float t)
+        private Collision ComputeClosestCollision(Particle[] particles, float?[][] pwCollisions,
+            float?[][] ppCollisionsFromOutside,
+            float t, int frameNumber)
         {
             var ppCollisions = Array2D.Create<float?>(particles.Length, particles.Length);
             SetAllPpCollisions(particles, ppCollisions);
@@ -80,7 +84,7 @@ namespace WindowsFormsApp1
 
             if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ)
             {
-                Console.WriteLine("diff");
+                Console.WriteLine($"{frameNumber} diff");
             }
 
             var pwc = FindClosestPwCollision(particles, pwCollisions, t);
