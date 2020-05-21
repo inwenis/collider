@@ -71,17 +71,6 @@ namespace WindowsFormsApp1
             // one array keeps relative collision, one keeps absolute
             var ppcfo = FindClosestPpCollision(particles, ppCollisionsFromOutside);
 
-            for (int i = 0; i < ppCollisionsFromOutside.Length; i++)
-            {
-                for (int j = 0; j < ppCollisionsFromOutside.Length; j++)
-                {
-                    if (ppCollisionsFromOutside[i][j].HasValue && ppCollisionsFromOutside[i][j] < 0)
-                    {
-                        Console.WriteLine("alert");
-                    }
-                }
-            }
-
             if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ)
             {
                 Console.WriteLine($"{frameNumber} diff");
