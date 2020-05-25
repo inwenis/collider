@@ -41,8 +41,8 @@ namespace WindowsFormsApp1
             var particlesA = particles.Select(x => x.Clone());
             var particlesB = particles.Select(x => x.Clone());
 
-            var wA = new WorkerArray();
-            var wB = new WorkerArray2();
+            var wA = new WorkerArray2();
+            var wB = new WorkerArray3();
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;

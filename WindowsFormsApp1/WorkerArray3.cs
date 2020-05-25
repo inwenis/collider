@@ -27,8 +27,8 @@ namespace WindowsFormsApp1
             t = 0;
             SetAllPwCollisions(particlesArr, pwCollisions, t);
             SetAllPpCollisions(particlesArr, ppCollisions, t);
-            c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions, t);
-            toc = t + c?.Dt ?? float.MaxValue;
+            c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions);
+            toc = c?.Dt ?? float.MaxValue;
             // tf - time of next frame
             var timeOfFrames = Enumerable.Range(0, nFrames).Select(x => x * stp).ToArray();
             for (var i = 0; i < timeOfFrames.Length; i++)
@@ -41,8 +41,8 @@ namespace WindowsFormsApp1
                     Move(particlesArr, ttc);
                     t = toc;
                     ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, t);
-                    c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions, t);
-                    toc = toc + c?.Dt ?? float.MaxValue;
+                    c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions);
+                    toc = c?.Dt ?? float.MaxValue;
                     ttf = tof - t;
                 }
 
@@ -134,10 +134,10 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static Collision FindClosestCollision(Particle[] particles, float?[][] pwCollisions, float?[][] ppCollisions, float t)
+        private static Collision FindClosestCollision(Particle[] particles, float?[][] pwCollisions, float?[][] ppCollisions)
         {
-            var ppc = FindClosestPpCollision(particles, ppCollisions, t);
-            var pwc = FindClosestPwCollision(particles, pwCollisions, t);
+            var ppc = FindClosestPpCollision(particles, ppCollisions);
+            var pwc = FindClosestPwCollision(particles, pwCollisions);
 
             if (pwc != null && ppc != null)
             {
@@ -157,7 +157,7 @@ namespace WindowsFormsApp1
             return null;
         }
 
-        private static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions, float t)
+        private static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions)
         {
             // PP collision - particle - particle collision
             var minI = 0;
@@ -179,11 +179,11 @@ namespace WindowsFormsApp1
             }
 
             return collisionExists
-                ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt - t)
+                ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt)
                 : null;
         }
         
-        private static Collision FindClosestPwCollision(Particle[] particles, float?[][] wallCollisions, float t)
+        private static Collision FindClosestPwCollision(Particle[] particles, float?[][] wallCollisions)
         {
             // PW collision - particle - wall collision
             int particleIndex = 0;
@@ -205,10 +205,10 @@ namespace WindowsFormsApp1
 
             if (wallIndex == 0 || wallIndex == 1)
             {
-                return new Collision(particles[particleIndex], particleIndex, minDt - t, true, "x");
+                return new Collision(particles[particleIndex], particleIndex, minDt, true, "x");
             }
 
-            return new Collision(particles[particleIndex], particleIndex, minDt - t, true, "y");
+            return new Collision(particles[particleIndex], particleIndex, minDt, true, "y");
         }
 
         private static float? ComputeCollisionTime(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
