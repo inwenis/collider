@@ -26,8 +26,8 @@ namespace WindowsFormsApp1
             step = (float)0.1;
             t = 0;
             SetAllPwCollisions(particlesArr, pwCollisions, t);
-            SetAllPpCollisions(particlesArr, ppCollisions);
-            c = ComputeClosestCollision(particlesArr, pwCollisions, ppCollisions, t, 0);
+            SetAllPpCollisions(particlesArr, ppCollisions, t);
+            c = ComputeClosestCollision(particlesArr, pwCollisions, ppCollisions, t);
             tc = t + c?.Dt ?? float.MaxValue;
             // tf - time of next frame
             var timeOfFrames = Enumerable.Range(0, nFrames).Select(x => x * step).ToArray();
@@ -41,7 +41,7 @@ namespace WindowsFormsApp1
                     Move(particlesArr, ttc);
                     t = tc;
                     ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, t);
-                    c = ComputeClosestCollision(particlesArr, pwCollisions, ppCollisions, t, i);
+                    c = ComputeClosestCollision(particlesArr, pwCollisions, ppCollisions, t);
                     tc = tc + c?.Dt ?? float.MaxValue;
                     ttf = tf - t;
                 }
@@ -61,40 +61,11 @@ namespace WindowsFormsApp1
             frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
         }
 
-        private Collision ComputeClosestCollision(Particle[] particles, float?[][] pwCollisions,
-            float?[][] ppCollisionsFromOutside,
-            float t, int frameNumber)
+        private Collision ComputeClosestCollision(Particle[] particles, float?[][] pwCollisions, float?[][] ppCollisions, float t)
         {
-            var ppCollisions = Array2D.Create<float?>(particles.Length, particles.Length);
-            SetAllPpCollisions(particles, ppCollisions);
-            // one array keeps relative collision, one keeps absolute
-            // TODO here
-            var ppc = FindClosestPpCollision(particles, ppCollisions);
-            var ppcfo = FindClosestPpCollision(particles, ppCollisionsFromOutside);
-            if (ppcfo != null)
-            {
-                ppcfo.Dt -= t;
-            }
-
-            if (ppc == null && ppcfo == null)
-            {
-                // ok
-            }
-            else if (ppc == null)
-            {
-                Console.WriteLine($"{frameNumber} diff");
-            }
-            else if (ppcfo == null)
-            {
-                Console.WriteLine($"{frameNumber} diff");
-            }
-            else if (ppc.IndexI != ppcfo.IndexI || ppc.IndexJ != ppcfo.IndexJ || Math.Abs(ppc.Dt - ppcfo.Dt) > 0.001)
-            {
-                Console.WriteLine($"{frameNumber} diff");
-            }
-
-            ppc = ppcfo;
+            var ppc = FindClosestPpCollision(particles, ppCollisions, t);
             var pwc = FindClosestPwCollision(particles, pwCollisions, t);
+
             if (pwc != null && ppc != null)
             {
                 return pwc.Dt < ppc.Dt
@@ -114,8 +85,7 @@ namespace WindowsFormsApp1
         }
 
         // PP collision - particle - particle collision
-
-        private static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions)
+        private static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions, float t)
         {
             var minI = 0;
             var minJ = 0;
@@ -136,17 +106,18 @@ namespace WindowsFormsApp1
             }
 
             return collisionExists
-                ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt)
+                ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt - t)
                 : null;
         }
 
-        private static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions)
+        private static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions, float t)
         {
             for (var i = 0; i < particles.Length; i++)
             {
                 for (var j = 0; j < particles.Length; j++)
                 {
                     var dt = ComputeCollisionTime(particles[i].Pos, particles[i].Vel, particles[j].Pos, particles[j].Vel);
+                    dt = dt.HasValue ? dt + t : null;
                     ppCollisions[i][j] = dt;
                     ppCollisions[j][i] = dt;
                 }
