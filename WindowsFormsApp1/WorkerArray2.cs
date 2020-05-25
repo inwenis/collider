@@ -17,38 +17,38 @@ namespace WindowsFormsApp1
             var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
 
             Collision c;
-            float step; // seconds
-            float t;    // time
-            float tc;   // time of next collision
-            float ttc;  // time to next collision
-            float ttf;  // time to next frame
+            float stp; // step seconds
+            float t;   // time
+            float toc; // time of next collision
+            float ttc; // time to next collision
+            float ttf; // time to next frame
 
-            step = (float)0.1;
+            stp = (float)0.1;
             t = 0;
             SetAllPwCollisions(particlesArr, pwCollisions, t);
             SetAllPpCollisions(particlesArr, ppCollisions, t);
             c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions, t);
-            tc = t + c?.Dt ?? float.MaxValue;
+            toc = t + c?.Dt ?? float.MaxValue;
             // tf - time of next frame
-            var timeOfFrames = Enumerable.Range(0, nFrames).Select(x => x * step).ToArray();
+            var timeOfFrames = Enumerable.Range(0, nFrames).Select(x => x * stp).ToArray();
             for (var i = 0; i < timeOfFrames.Length; i++)
             {
-                var tf = timeOfFrames[i];
-                ttf = tf - t;
-                while (tc < tf)
+                var tof = timeOfFrames[i];
+                ttf = tof - t;
+                while (toc < tof)
                 {
-                    ttc = tc - t;
+                    ttc = toc - t;
                     Move(particlesArr, ttc);
-                    t = tc;
+                    t = toc;
                     ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, t);
                     c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions, t);
-                    tc = tc + c?.Dt ?? float.MaxValue;
-                    ttf = tf - t;
+                    toc = toc + c?.Dt ?? float.MaxValue;
+                    ttf = tof - t;
                 }
 
                 Move(particlesArr, ttf);
                 AddFrame(frames, particlesArr);
-                t = tf;
+                t = tof;
             }
 
             Debug.WriteLine($"Computed: {frames.Count} frames");
