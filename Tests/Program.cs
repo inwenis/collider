@@ -25,10 +25,10 @@ namespace Tests
 
             var particlesClone = particles.Select(x => x.Clone()).ToList();
 
-            var wa = new WorkerArray2();
+            var wa = new Worker();
             var framesA = wa.Simulate(nFrames, particles);
 
-            var wb = new WorkerArray3();
+            var wb = new WorkerArray();
             var framesB = wb.Simulate(nFrames, particlesClone);
 
             var (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
