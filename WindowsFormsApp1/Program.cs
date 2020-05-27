@@ -14,6 +14,7 @@ namespace WindowsFormsApp1
         private static Form1 _mainForm;
         private static List<Frame> _framesA;
         private static List<Frame> _framesB;
+        private static Size _size;
 
         /// <summary>
         /// The main entry point for the application.
@@ -25,7 +26,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
 
             var nFrames = 6000;
-            var size = new Size(700, 400);
+            _size = new Size(700, 400);
 
             List<Particle> particles;
             if (File.Exists("input.xml"))
@@ -35,7 +36,7 @@ namespace WindowsFormsApp1
             else
             {
                 
-                particles = ParticlesGenerator.RandomParticles(250, size);
+                particles = ParticlesGenerator.RandomParticles(250, _size);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
@@ -87,8 +88,8 @@ namespace WindowsFormsApp1
 
         private static Bitmap PrintFrame(IEnumerable<Vector2> positionsA, List<Vector2> positionsB)
         {
-            Bitmap bitmap = new Bitmap(750, 450);
-            Graphics flagGraphics = Graphics.FromImage(bitmap);
+            var bitmap = new Bitmap(_size.Width, _size.Height);
+            var flagGraphics = Graphics.FromImage(bitmap);
 
             foreach (var p in positionsA)
             {
