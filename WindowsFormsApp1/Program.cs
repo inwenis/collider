@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 using System.Numerics;
 using Timer = System.Threading.Timer;
@@ -51,7 +50,6 @@ namespace WindowsFormsApp1
             _mainForm.TrackBar1.Minimum = 0;
             _mainForm.TrackBar1.Maximum = nFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
-
 
             Timer t = new Timer(PrintFrames, null, 0, int.MaxValue);
 
