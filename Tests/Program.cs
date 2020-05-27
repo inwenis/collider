@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using WindowsFormsApp1;
@@ -11,6 +12,7 @@ namespace Tests
         static void Main(string[] args)
         {
             var nFrames = 6000;
+            var size = new Size(700, 400);
 
             List<Particle> particles;
             if (File.Exists("input.xml"))
@@ -19,7 +21,7 @@ namespace Tests
             }
             else
             {
-                particles = ParticlesGenerator.RandomParticles(20);
+                particles = ParticlesGenerator.RandomParticles(20, size);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
@@ -30,7 +32,7 @@ namespace Tests
             var particlesB = particles.Select(x => x.Clone());
 
             var framesA = wA.Simulate(nFrames, particlesA);
-            var framesB = wB.Simulate(nFrames, particlesB);
+            var framesB = wB.Simulate(nFrames, particlesB, size);
 
             var (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
 
