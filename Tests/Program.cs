@@ -23,13 +23,14 @@ namespace Tests
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
-            var particlesClone = particles.Select(x => x.Clone()).ToList();
+            var wA = new Worker();
+            var wB = new WorkerArray();
 
-            var wa = new Worker();
-            var framesA = wa.Simulate(nFrames, particles);
+            var particlesA = particles.Select(x => x.Clone());
+            var particlesB = particles.Select(x => x.Clone());
 
-            var wb = new WorkerArray();
-            var framesB = wb.Simulate(nFrames, particlesClone);
+            var framesA = wA.Simulate(nFrames, particlesA);
+            var framesB = wB.Simulate(nFrames, particlesB);
 
             var (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
 

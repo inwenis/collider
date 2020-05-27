@@ -38,19 +38,21 @@ namespace WindowsFormsApp1
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
+            var wA = new Worker();
+            var wB = new WorkerArray();
+
             var particlesA = particles.Select(x => x.Clone());
             var particlesB = particles.Select(x => x.Clone());
 
-            var wA = new Worker();
-            var wB = new WorkerArray();
+            _framesA = wA.Simulate(nFrames, particlesA);
+            _framesB = wB.Simulate(nFrames, particlesB);
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
             _mainForm.TrackBar1.Maximum = nFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
-            _framesA = wA.Simulate(nFrames, particlesA);
-            _framesB = wB.Simulate(nFrames, particlesB);
+
             Timer t = new Timer(PrintFrames, null, 0, int.MaxValue);
 
             Application.Run(_mainForm);
