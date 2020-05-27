@@ -24,7 +24,8 @@ namespace WindowsFormsApp1
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var nFrames = 12000;
+            var nFrames = 6000;
+            var size = new Size(700, 400);
 
             List<Particle> particles;
             if (File.Exists("input.xml"))
@@ -33,18 +34,20 @@ namespace WindowsFormsApp1
             }
             else
             {
-                particles = ParticlesGenerator.RandomParticles(2);
+                
+                particles = ParticlesGenerator.RandomParticles(250, size);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
-            var wA = new Worker();
+            //var wA = new Worker();
             var wB = new WorkerArray();
 
             var particlesA = particles.Select(x => x.Clone());
             var particlesB = particles.Select(x => x.Clone());
 
-            _framesA = wA.Simulate(nFrames, particlesA);
+            //_framesA = wA.Simulate(nFrames, particlesA);
             _framesB = wB.Simulate(nFrames, particlesB);
+            _framesA = _framesB;
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;

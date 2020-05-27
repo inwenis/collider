@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 
@@ -7,7 +8,7 @@ namespace WindowsFormsApp1
 {
     public static class ParticlesGenerator
     {
-        public static List<Particle> RandomParticles(int count)
+        public static List<Particle> RandomParticles(int count, Size size)
         {
             var random = new Random(DateTimeOffset.UtcNow.Millisecond);
             var list = new List<Particle>();
@@ -15,7 +16,7 @@ namespace WindowsFormsApp1
             {
                 var particle = new Particle
                 {
-                    Pos = NextNonCollidingPosition(random, list),
+                    Pos = NextNonCollidingPosition(random, list, size),
                     Vel = random.NextVector2(-2.5, 2.5, -2.5, 2.5)
                 };
                 list.Add(particle);
@@ -24,14 +25,16 @@ namespace WindowsFormsApp1
             return list;
         }
 
-        private static Vector2 NextNonCollidingPosition(Random random, List<Particle> existingParticles)
+        private static Vector2 NextNonCollidingPosition(Random random, List<Particle> existingParticles, Size size)
         {
             Vector2 position;
             const int sigma = 5;
             const int nonCollidingDistance = 2 * sigma + 1; // +1 is added to make sure particles do not overlap
+            const int nonCollidingDistanceFromWall = sigma + 1;
             do
             {
-                position = random.NextVector2(6, 200, 6, 200);
+                // below numbers make sure particles do not overlap with walls
+                position = random.NextVector2(nonCollidingDistanceFromWall, size.Width - nonCollidingDistanceFromWall, nonCollidingDistanceFromWall, size.Height - nonCollidingDistanceFromWall);
             } while (existingParticles.Any(x => (x.Pos - position).Length() < nonCollidingDistance));
 
             return position;
