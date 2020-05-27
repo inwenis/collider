@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 
@@ -8,7 +9,7 @@ namespace WindowsFormsApp1
 {
     public class WorkerArray
     {
-        public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles)
+        public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
         {
             var particlesArr = particles.ToArray();
             var frames = new List<Frame>();
@@ -25,7 +26,7 @@ namespace WindowsFormsApp1
 
             stp = (float)0.1;
             t = 0;
-            SetAllPwCollisions(particlesArr, pwCollisions, t);
+            SetAllPwCollisions(particlesArr, pwCollisions, size, t);
             SetAllPpCollisions(particlesArr, ppCollisions, t);
             c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions);
             toc = c?.Dt ?? float.MaxValue;
@@ -40,7 +41,7 @@ namespace WindowsFormsApp1
                     ttc = toc - t;
                     Move(particlesArr, ttc);
                     t = toc;
-                    ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, t);
+                    ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, size, t);
                     c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions);
                     toc = c?.Dt ?? float.MaxValue;
                     ttf = tof - t;
@@ -75,25 +76,25 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void SetAllPwCollisions(Particle[] particles, float?[][] wallCollisions, float t)
+        private static void SetAllPwCollisions(Particle[] particles, float?[][] wallCollisions, Size size, float t)
         {
             for (var j = 0; j < particles.Length; j++)
             {
                 var i = particles[j];
                 var c = wallCollisions[j];
-                SetXWallCollisions(i.Pos, i.Vel, c, t);
-                SetYWallCollisions(i.Pos, i.Vel, c, t);
+                SetXWallCollisions(i.Pos, i.Vel, c, size, t);
+                SetYWallCollisions(i.Pos, i.Vel, c, size, t);
             }
         }
 
-        private static void SetYWallCollisions(Vector2 r, Vector2 v, float?[] c, float t)
+        private static void SetYWallCollisions(Vector2 r, Vector2 v, float?[] c, Size size, float t)
         {
             float? dt;
             float si = 5; // sigma, radius
 
             if (v.Y > 0)
             {
-                dt = (400 - si - r.Y) / v.Y;
+                dt = (size.Height - si - r.Y) / v.Y;
                 c[2] = null;
                 c[3] = t + dt;
             }
@@ -110,14 +111,14 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void SetXWallCollisions(Vector2 r, Vector2 v, float?[] c, float t)
+        private static void SetXWallCollisions(Vector2 r, Vector2 v, float?[] c, Size size, float t)
         {
             float? dt;
             float si = 5; // sigma, radius
 
             if (v.X > 0)
             {
-                dt = (700 - si - r.X) / v.X;
+                dt = (size.Width - si - r.X) / v.X;
                 c[0] = null;
                 c[1] = t + dt;
             }
@@ -248,7 +249,8 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void ApplyCollision(Particle[] particles, Collision c, float?[][] pwCollisions, float?[][] ppCollisions, float t)
+        private static void ApplyCollision(Particle[] particles, Collision c, float?[][] pwCollisions,
+            float?[][] ppCollisions, Size size, float t)
         {
             if (!c.IsWallCollision)
             {
@@ -282,11 +284,11 @@ namespace WindowsFormsApp1
                 i.Vel = new Vector2((float)vxip, (float)vyip);
                 j.Vel = new Vector2((float)vxjp, (float)vyjp);
 
-                SetXWallCollisions(i.Pos, i.Vel, pwCollisions[c.IndexI], t);
-                SetYWallCollisions(i.Pos, i.Vel, pwCollisions[c.IndexI], t);
+                SetXWallCollisions(i.Pos, i.Vel, pwCollisions[c.IndexI], size, t);
+                SetYWallCollisions(i.Pos, i.Vel, pwCollisions[c.IndexI], size, t);
 
-                SetXWallCollisions(j.Pos, j.Vel, pwCollisions[c.IndexJ], t);
-                SetYWallCollisions(j.Pos, j.Vel, pwCollisions[c.IndexJ], t);
+                SetXWallCollisions(j.Pos, j.Vel, pwCollisions[c.IndexJ], size, t);
+                SetYWallCollisions(j.Pos, j.Vel, pwCollisions[c.IndexJ], size, t);
 
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
@@ -310,8 +312,8 @@ namespace WindowsFormsApp1
             else if (c.IsWallCollision && c.Wall == "x")
             {
                 c.ParticleI.Vel = c.ParticleI.Vel * new Vector2(-1, 1);
-                SetXWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], t);
-                SetYWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], t);
+                SetXWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, t);
+                SetYWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, t);
 
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
@@ -326,8 +328,8 @@ namespace WindowsFormsApp1
             else if (c.IsWallCollision && c.Wall == "y")
             {
                 c.ParticleI.Vel = c.ParticleI.Vel * new Vector2(1, -1);
-                SetXWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], t);
-                SetYWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], t);
+                SetXWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, t);
+                SetYWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, t);
 
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {

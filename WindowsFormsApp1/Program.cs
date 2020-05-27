@@ -47,7 +47,7 @@ namespace WindowsFormsApp1
             var particlesB = particles.Select(x => x.Clone());
 
             //_framesA = wA.Simulate(nFrames, particlesA);
-            _framesB = wB.Simulate(nFrames, particlesB);
+            _framesB = wB.Simulate(nFrames, particlesB, _size);
             _framesA = _framesB;
 
             _mainForm = new Form1();
