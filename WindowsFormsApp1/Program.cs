@@ -26,7 +26,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
 
             var nFrames = 1000;
-            _size = new Size(1000, 800);
+            _size = new Size(1000, 700);
 
             List<Particle> particles;
             if (File.Exists("input.xml"))
@@ -40,14 +40,15 @@ namespace WindowsFormsApp1
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
-            var wA = new Worker();
+            //var wA = new Worker();
             var wB = new WorkerArray();
 
-            var particlesA = particles.Select(x => x.Clone());
+            //var particlesA = particles.Select(x => x.Clone());
             var particlesB = particles.Select(x => x.Clone());
 
-            _framesA = wA.Simulate(nFrames, particlesA, _size);
+            //_framesA = wA.Simulate(nFrames, particlesA, _size);
             _framesB = wB.Simulate(nFrames, particlesB, _size);
+            _framesA = _framesB;
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
@@ -64,7 +65,7 @@ namespace WindowsFormsApp1
             var trackBar = (TrackBar) sender;
             var frameA = _framesA[trackBar.Value];
             var frameB = _framesB[trackBar.Value];
-            _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, frameB.Positions);
+            _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, frameB.Positions, _size);
             _mainForm.Label1.Text = trackBar.Value.ToString();
         }
 
@@ -76,7 +77,7 @@ namespace WindowsFormsApp1
             {
                 _mainForm.PictureBox1.Invoke((MethodInvoker)delegate {
                     // Running on the UI thread
-                    _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, frameB.Positions);
+                    _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, frameB.Positions, _size);
                     _mainForm.Label1.Text = frameNumber.ToString();
                     _mainForm.TrackBar1.Value = frameNumber;
                 });
@@ -85,10 +86,15 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static Bitmap PrintFrame(IEnumerable<Vector2> positionsA, List<Vector2> positionsB)
+        private static Bitmap PrintFrame(IEnumerable<Vector2> positionsA, List<Vector2> positionsB, Size size)
         {
-            var bitmap = new Bitmap(_size.Width, _size.Height);
+            var bitmap = new Bitmap(size.Width+1, size.Height+1); // add 1 so there is space to print the border
             var g = Graphics.FromImage(bitmap);
+
+            g.DrawLine(Pens.Black, 0,          0,           size.Width, 0);
+            g.DrawLine(Pens.Black, size.Width, 0,           size.Width, size.Height);
+            g.DrawLine(Pens.Black, size.Width, size.Height, 0,          size.Height);
+            g.DrawLine(Pens.Black, 0,          size.Height, 0,          0);
 
             foreach (var p in positionsA)
             {
