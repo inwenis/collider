@@ -25,6 +25,14 @@ namespace WindowsFormsApp1
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            // which will be params?
+            // read them from file
+            // read them from input args?
+
+            // number of frames
+            // size of simulation area
+            // number of random particles / file with particles positions / velocities
+
             var nFrames = 1000;
             _size = new Size(1000, 700);
 
