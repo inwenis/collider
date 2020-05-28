@@ -31,7 +31,7 @@ namespace Tests
             var particlesA = particles.Select(x => x.Clone());
             var particlesB = particles.Select(x => x.Clone());
 
-            var framesA = wA.Simulate(nFrames, particlesA);
+            var framesA = wA.Simulate(nFrames, particlesA, size);
             var framesB = wB.Simulate(nFrames, particlesB, size);
 
             var (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
