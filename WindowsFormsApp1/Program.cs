@@ -5,10 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Numerics;
+using CommandLine;
 using Timer = System.Threading.Timer;
 
 namespace WindowsFormsApp1
 {
+    class Options
+    {
+        [Option('f', "frames", Required = true)]
+        public int NumberOfFrames { get; set; }
+    }
+
     static class Program
     {
         private static Form1 _mainForm;
@@ -20,8 +27,11 @@ namespace WindowsFormsApp1
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
+            Options parsed = null;
+            Parser.Default.ParseArguments<Options>(args).WithParsed(o => parsed = o);
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -33,7 +43,7 @@ namespace WindowsFormsApp1
             // size of simulation area
             // number of random particles / file with particles positions / velocities
 
-            var nFrames = 1000;
+            var nFrames = parsed.NumberOfFrames;
             _size = new Size(1000, 700);
 
             List<Particle> particles;
