@@ -88,16 +88,16 @@ namespace WindowsFormsApp1
         private static Bitmap PrintFrame(IEnumerable<Vector2> positionsA, List<Vector2> positionsB)
         {
             var bitmap = new Bitmap(_size.Width, _size.Height);
-            var flagGraphics = Graphics.FromImage(bitmap);
+            var g = Graphics.FromImage(bitmap);
 
             foreach (var p in positionsA)
             {
-                flagGraphics.FillEllipse(Brushes.Aqua, p.X - 5, p.Y - 5, 10, 10);
+                g.FillEllipse(Brushes.Aqua, p.X - 5, p.Y - 5, 10, 10);
             }
 
             foreach (var p in positionsB)
             {
-                flagGraphics.FillEllipse(Brushes.BlueViolet, p.X - 5, p.Y - 5, 10, 10);
+                g.FillEllipse(Brushes.BlueViolet, p.X - 5, p.Y - 5, 10, 10);
             }
 
             return bitmap;
