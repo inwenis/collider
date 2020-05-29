@@ -13,7 +13,6 @@ namespace WindowsFormsApp1
     {
         private static Form1 _mainForm;
         private static List<Frame> _framesA;
-        private static List<Frame> _framesB;
         private static Size _size;
 
         static void Main(string[] args)
@@ -41,15 +40,11 @@ namespace WindowsFormsApp1
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
-            //var wA = new Worker();
-            var wB = new WorkerArray();
+            var w = new WorkerArray();
 
-            //var particlesA = particles.Select(x => x.Clone());
             var particlesB = particles.Select(x => x.Clone());
 
-            //_framesA = wA.Simulate(nFrames, particlesA, _size);
-            _framesB = wB.Simulate(nFrames, particlesB, _size);
-            _framesA = _framesB;
+            _framesA = w.Simulate(nFrames, particlesB, _size);
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
@@ -65,8 +60,7 @@ namespace WindowsFormsApp1
         {
             var trackBar = (TrackBar) sender;
             var frameA = _framesA[trackBar.Value];
-            var frameB = _framesB[trackBar.Value];
-            _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, frameB.Positions, _size);
+            _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, _size);
             _mainForm.Label1.Text = trackBar.Value.ToString();
         }
 
@@ -74,11 +68,11 @@ namespace WindowsFormsApp1
         {
             int frameNumber = 0;
 
-            foreach (var (frameA, frameB) in _framesA.Zip(_framesB, (a, b) => (a, b)))
+            foreach (var frame in _framesA)
             {
                 _mainForm.PictureBox1.Invoke((MethodInvoker)delegate {
                     // Running on the UI thread
-                    _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, frameB.Positions, _size);
+                    _mainForm.PictureBox1.Image = PrintFrame(frame.Positions, _size);
                     _mainForm.Label1.Text = frameNumber.ToString();
                     _mainForm.TrackBar1.Value = frameNumber;
                 });
@@ -87,7 +81,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static Bitmap PrintFrame(IEnumerable<Vector2> positionsA, List<Vector2> positionsB, Size size)
+        private static Bitmap PrintFrame(IEnumerable<Vector2> positionsA, Size size)
         {
             var bitmap = new Bitmap(size.Width+1, size.Height+1); // add 1 so there is space to print the border
             var g = Graphics.FromImage(bitmap);
@@ -99,12 +93,7 @@ namespace WindowsFormsApp1
 
             foreach (var p in positionsA)
             {
-                g.FillEllipse(Brushes.Aqua, p.X - 5, p.Y - 5, 10, 10);
-            }
-
-            foreach (var p in positionsB)
-            {
-                g.FillEllipse(Brushes.BlueViolet, p.X - 5, p.Y - 5, 10, 10);
+                g.FillEllipse(Brushes.Black, p.X - 5, p.Y - 5, 10, 10);
             }
 
             return bitmap;
