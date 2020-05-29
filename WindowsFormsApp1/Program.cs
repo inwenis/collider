@@ -26,8 +26,8 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
 
             var nFrames = options.NumberOfFrames;
-            var array = options.Dimensions.ToArray();
-            _size = new Size(array[0], array[1]);
+            var size = options.Dimensions.ToArray();
+            _size = new Size(size[0], size[1]);
 
             List<Particle> particles;
             if (options.ParticlesFile != null)
