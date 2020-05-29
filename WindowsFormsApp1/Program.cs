@@ -21,8 +21,7 @@ namespace WindowsFormsApp1
             var parserResult = Parser.Default.ParseArguments<Options>(args);
             var options = ((Parsed<Options>) parserResult).Value;
 
-            // TOOD display arguments here
-            // dispaly, copy paste this if you want to to run later
+            Console.WriteLine($"To rerun with same arguments use: {options.ToInputArgumentsString()}");
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
