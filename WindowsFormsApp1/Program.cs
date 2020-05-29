@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Numerics;
@@ -12,8 +11,17 @@ namespace WindowsFormsApp1
 {
     class Options
     {
-        [Option('f', "frames", Required = true)]
+        [Option('f', "frames", Required = false, Default = 1000)]
         public int NumberOfFrames { get; set; }
+
+        [Option('n', "particles", Required = false, Default = 100)]
+        public int NumberOfParticles { get; set; }
+
+        [Option('i', "particlesFile", Required = false)]
+        public string ParticlesFile  { get; set; }
+
+        [Option('s', "size", Separator = ',', Min = 2, Max = 2, Required = false, Default = new int[] { 400, 400})]
+        public IEnumerable<int> Dimensions { get; set; }
     }
 
     static class Program
@@ -26,11 +34,14 @@ namespace WindowsFormsApp1
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        [STAThread]
+        //[STAThread]
         static void Main(string[] args)
         {
-            Options parsed = null;
-            Parser.Default.ParseArguments<Options>(args).WithParsed(o => parsed = o);
+            var parserResult = Parser.Default.ParseArguments<Options>(args);
+            var options = ((Parsed<Options>) parserResult).Value;
+
+            // TOOD display arguments here
+            // dispaly, copy paste this if you want to to run later
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -43,18 +54,18 @@ namespace WindowsFormsApp1
             // size of simulation area
             // number of random particles / file with particles positions / velocities
 
-            var nFrames = parsed.NumberOfFrames;
-            _size = new Size(1000, 700);
+            var nFrames = options.NumberOfFrames;
+            var array = options.Dimensions.ToArray();
+            _size = new Size(array[0], array[1]);
 
             List<Particle> particles;
-            if (File.Exists("input.xml"))
+            if (options.ParticlesFile != null)
             {
-                particles = Tools.ReadFromFile("input.xml");
+                particles = Tools.ReadFromFile(options.ParticlesFile);
             }
             else
             {
-                
-                particles = ParticlesGenerator.RandomParticles(250, _size);
+                particles = ParticlesGenerator.RandomParticles(options.NumberOfParticles, _size);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
