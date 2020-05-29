@@ -66,6 +66,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Frame.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="ParticlesGenerator.cs" />
     <Compile Include="Particle.cs" />
     <Compile Include="Program.cs" />

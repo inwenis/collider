@@ -9,21 +9,6 @@ using Timer = System.Threading.Timer;
 
 namespace WindowsFormsApp1
 {
-    class Options
-    {
-        [Option('f', "frames", Required = false, Default = 1000)]
-        public int NumberOfFrames { get; set; }
-
-        [Option('n', "particles", Required = false, Default = 100)]
-        public int NumberOfParticles { get; set; }
-
-        [Option('i', "particlesFile", Required = false)]
-        public string ParticlesFile  { get; set; }
-
-        [Option('s', "size", Separator = ',', Min = 2, Max = 2, Required = false, Default = new int[] { 400, 400})]
-        public IEnumerable<int> Dimensions { get; set; }
-    }
-
     static class Program
     {
         private static Form1 _mainForm;
@@ -31,10 +16,6 @@ namespace WindowsFormsApp1
         private static List<Frame> _framesB;
         private static Size _size;
 
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        //[STAThread]
         static void Main(string[] args)
         {
             var parserResult = Parser.Default.ParseArguments<Options>(args);
@@ -45,14 +26,6 @@ namespace WindowsFormsApp1
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            // which will be params?
-            // read them from file
-            // read them from input args?
-
-            // number of frames
-            // size of simulation area
-            // number of random particles / file with particles positions / velocities
 
             var nFrames = options.NumberOfFrames;
             var array = options.Dimensions.ToArray();
