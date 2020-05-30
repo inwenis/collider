@@ -11,6 +11,9 @@ namespace WindowsFormsApp1
         [Option('n', "particles", Required = false, Default = 100)]
         public int NumberOfParticles { get; set; }
 
+        [Option('r', "radius", Required = false, Default = 5)]
+        public int Radius { get; set; }
+
         [Option('i', "particlesFile", Required = false)]
         public string ParticlesFile  { get; set; }
 
@@ -22,12 +25,14 @@ namespace WindowsFormsApp1
             if (ParticlesFile != null)
             {
                 return $"--{nameof(NumberOfFrames)}={NumberOfFrames} " +
+                       $"--{nameof(Radius)}={Radius} " +
                        $"--{nameof(ParticlesFile)}={ParticlesFile} " +
                        $"--{nameof(Dimensions)}={string.Join(",", Dimensions)}";
             }
             else
             {
                 return $"--{nameof(NumberOfFrames)}={NumberOfFrames} " +
+                       $"--{nameof(Radius)}={Radius} " +
                        $"--{nameof(NumberOfParticles)}={NumberOfParticles} " +
                        $"--{nameof(Dimensions)}={string.Join(",", Dimensions)}";
             }

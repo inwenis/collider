@@ -28,7 +28,7 @@ namespace WindowsFormsApp1
             var nFrames = options.NumberOfFrames;
             var size = options.Dimensions.ToArray();
             _size = new Size(size[0], size[1]);
-            var s = 5; // sigma - radius of particles
+            var s = options.Radius; // sigma - radius of particles
 
             List<Particle> particles;
             if (options.ParticlesFile != null)
