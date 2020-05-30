@@ -9,10 +9,10 @@ namespace WindowsFormsApp1
 {
     public class WorkerArray
     {
-        public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
+        public List<Particle[]> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
         {
             var particlesArr = particles.ToArray();
-            var frames = new List<Frame>();
+            var frames = new List<Particle[]>();
 
             var pwCollisions = Array2D.Create<float?>(particlesArr.Length, 4); // 4 - there are walls
             var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
@@ -348,9 +348,9 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void AddFrame(List<Frame> frames, Particle[] particlesArr)
+        private static void AddFrame(List<Particle[]> frames, Particle[] particlesArr)
         {
-            frames.Add(new Frame { Positions = particlesArr.Select(x => x.Pos).ToList() });
+            frames.Add(particlesArr.Select(x => x.Clone()).ToArray());
         }
     }
 }
