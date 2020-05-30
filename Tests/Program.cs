@@ -21,7 +21,8 @@ namespace Tests
             }
             else
             {
-                particles = ParticlesGenerator.RandomParticles(20, 5, size);
+                particles = new List<Particle>();
+                ParticlesGenerator.AddRandomParticles(particles, 20, 5, size);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
@@ -32,7 +33,7 @@ namespace Tests
             var particlesB = particles.Select(x => x.Clone());
 
             var framesA = wA.Simulate(nFrames, particlesA, size);
-            var framesB = wB.Simulate(nFrames, particlesB, size, 5);
+            var framesB = wB.Simulate(nFrames, particlesB, size);
 
             var (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
 

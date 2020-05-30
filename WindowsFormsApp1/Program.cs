@@ -37,7 +37,8 @@ namespace WindowsFormsApp1
             }
             else
             {
-                particles = ParticlesGenerator.RandomParticles(options.NumberOfParticles, s, _size);
+                particles = new List<Particle> {new Particle {Pos = new Vector2(100, 100), Vel = Vector2.Zero, Sig = 20}};
+                ParticlesGenerator.AddRandomParticles(particles, options.NumberOfParticles, s, _size);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
@@ -50,7 +51,7 @@ namespace WindowsFormsApp1
             _mainForm.TrackBar1.Maximum = nFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
-            Timer t = new Timer(obj => PrintFrames(obj, s), null, 0, int.MaxValue);
+            Timer t = new Timer(obj => PrintFrames(s), null, 0, int.MaxValue);
 
             Application.Run(_mainForm);
         }
@@ -63,7 +64,7 @@ namespace WindowsFormsApp1
             _mainForm.Label1.Text = trackBar.Value.ToString();
         }
 
-        private static void PrintFrames(object obj, int s)
+        private static void PrintFrames(int s)
         {
             int frameNumber = 0;
 
