@@ -43,9 +43,7 @@ namespace WindowsFormsApp1
 
             var w = new WorkerArray();
 
-            var particlesB = particles.Select(x => x.Clone());
-
-            _framesA = w.Simulate(nFrames, particlesB, _size, s);
+            _framesA = w.Simulate(nFrames, particles, _size, s);
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
