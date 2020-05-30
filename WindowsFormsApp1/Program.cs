@@ -41,9 +41,14 @@ namespace WindowsFormsApp1
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
+            foreach (var particle in particles)
+            {
+                particle.Sig = 5;
+            }
+
             var w = new WorkerArray();
 
-            _framesA = w.Simulate(nFrames, particles, _size, s);
+            _framesA = w.Simulate(nFrames, particles, _size);
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
