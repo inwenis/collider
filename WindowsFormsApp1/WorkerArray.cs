@@ -88,30 +88,6 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void SetYWallCollisions(Vector2 r, Vector2 v, float?[] c, Size size, int s, float t)
-        {
-            float? dt;
-            float si = s;
-
-            if (v.Y > 0)
-            {
-                dt = (size.Height - si - r.Y) / v.Y;
-                c[2] = null;
-                c[3] = t + dt;
-            }
-            else if (v.Y < 0)
-            {
-                dt = (si - r.Y) / v.Y;
-                c[2] = t + dt;
-                c[3] = null;
-            }
-            else //v.Y == 0
-            {
-                c[2] = null;
-                c[3] = null;
-            }
-        }
-
         private static void SetXWallCollisions(Vector2 r, Vector2 v, float?[] c, Size size, int s, float t)
         {
             float? dt;
@@ -133,6 +109,30 @@ namespace WindowsFormsApp1
             {
                 c[0] = null;
                 c[1] = null;
+            }
+        }
+
+        private static void SetYWallCollisions(Vector2 r, Vector2 v, float?[] c, Size size, int s, float t)
+        {
+            float? dt;
+            float si = s;
+
+            if (v.Y > 0)
+            {
+                dt = (size.Height - si - r.Y) / v.Y;
+                c[2] = null;
+                c[3] = t + dt;
+            }
+            else if (v.Y < 0)
+            {
+                dt = (si - r.Y) / v.Y;
+                c[2] = t + dt;
+                c[3] = null;
+            }
+            else //v.Y == 0
+            {
+                c[2] = null;
+                c[3] = null;
             }
         }
 
