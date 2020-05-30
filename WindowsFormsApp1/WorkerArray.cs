@@ -297,7 +297,7 @@ namespace WindowsFormsApp1
 
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
-                    var dt = ComputeCollisionTime(j.Pos, j.Vel, i.Sig, particles[k].Pos, particles[k].Vel, particles[k].Sig);
+                    var dt = ComputeCollisionTime(j.Pos, j.Vel, j.Sig, particles[k].Pos, particles[k].Vel, particles[k].Sig);
                     dt = dt.HasValue ? dt + t : null;
                     ppCollisions[c.IndexJ][k] = dt;
                     ppCollisions[k][c.IndexJ] = dt;
