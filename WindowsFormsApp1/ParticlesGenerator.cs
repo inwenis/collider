@@ -8,7 +8,7 @@ namespace WindowsFormsApp1
 {
     public static class ParticlesGenerator
     {
-        public static List<Particle> RandomParticles(int count, Size size)
+        public static List<Particle> RandomParticles(int count, Size size, int s)
         {
             var random = new Random(DateTimeOffset.UtcNow.Millisecond);
             var list = new List<Particle>();
@@ -16,7 +16,7 @@ namespace WindowsFormsApp1
             {
                 var particle = new Particle
                 {
-                    Pos = NextNonCollidingPosition(random, list, size),
+                    Pos = NextNonCollidingPosition(random, list, size, s),
                     Vel = random.NextVector2(-2.5, 2.5, -2.5, 2.5)
                 };
                 list.Add(particle);
@@ -25,17 +25,16 @@ namespace WindowsFormsApp1
             return list;
         }
 
-        private static Vector2 NextNonCollidingPosition(Random random, List<Particle> existingParticles, Size size)
+        private static Vector2 NextNonCollidingPosition(Random random, List<Particle> existingParticles, Size size, int s)
         {
             Vector2 position;
-            const int sigma = 5;
-            const int nonCollidingDistance = 2 * sigma + 1; // +1 is added to make sure particles do not overlap
-            const int nonCollidingDistanceFromWall = sigma + 1;
+            int nonCollidingPpDistance = 2 * s + 1; // +1 is added to make sure particles do not overlap
+            int nonCollidingPwDistance = s + 1;
             do
             {
                 // below numbers make sure particles do not overlap with walls
-                position = random.NextVector2(nonCollidingDistanceFromWall, size.Width - nonCollidingDistanceFromWall, nonCollidingDistanceFromWall, size.Height - nonCollidingDistanceFromWall);
-            } while (existingParticles.Any(x => (x.Pos - position).Length() < nonCollidingDistance));
+                position = random.NextVector2(nonCollidingPwDistance, size.Width - nonCollidingPwDistance, nonCollidingPwDistance, size.Height - nonCollidingPwDistance);
+            } while (existingParticles.Any(x => (x.Pos - position).Length() < nonCollidingPpDistance));
 
             return position;
         }
