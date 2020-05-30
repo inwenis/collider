@@ -28,6 +28,7 @@ namespace WindowsFormsApp1
             var nFrames = options.NumberOfFrames;
             var size = options.Dimensions.ToArray();
             _size = new Size(size[0], size[1]);
+            var s = 5; // sigma - radius of particles
 
             List<Particle> particles;
             if (options.ParticlesFile != null)
@@ -44,14 +45,14 @@ namespace WindowsFormsApp1
 
             var particlesB = particles.Select(x => x.Clone());
 
-            _framesA = w.Simulate(nFrames, particlesB, _size);
+            _framesA = w.Simulate(nFrames, particlesB, _size, s);
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
             _mainForm.TrackBar1.Maximum = nFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
-            Timer t = new Timer(PrintFrames, null, 0, int.MaxValue);
+            Timer t = new Timer(obj => PrintFrames(obj, s), null, 0, int.MaxValue);
 
             Application.Run(_mainForm);
         }
@@ -60,11 +61,11 @@ namespace WindowsFormsApp1
         {
             var trackBar = (TrackBar) sender;
             var frameA = _framesA[trackBar.Value];
-            _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, _size);
+            _mainForm.PictureBox1.Image = PrintFrame(frameA.Positions, _size, 5);
             _mainForm.Label1.Text = trackBar.Value.ToString();
         }
 
-        private static void PrintFrames(object obj)
+        private static void PrintFrames(object obj, int s)
         {
             int frameNumber = 0;
 
@@ -72,7 +73,7 @@ namespace WindowsFormsApp1
             {
                 _mainForm.PictureBox1.Invoke((MethodInvoker)delegate {
                     // Running on the UI thread
-                    _mainForm.PictureBox1.Image = PrintFrame(frame.Positions, _size);
+                    _mainForm.PictureBox1.Image = PrintFrame(frame.Positions, _size, s);
                     _mainForm.Label1.Text = frameNumber.ToString();
                     _mainForm.TrackBar1.Value = frameNumber;
                 });
@@ -81,7 +82,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static Bitmap PrintFrame(IEnumerable<Vector2> positionsA, Size size)
+        private static Bitmap PrintFrame(IEnumerable<Vector2> positionsA, Size size, int s)
         {
             var bitmap = new Bitmap(size.Width+1, size.Height+1); // add 1 so there is space to print the border
             var g = Graphics.FromImage(bitmap);
@@ -93,7 +94,7 @@ namespace WindowsFormsApp1
 
             foreach (var p in positionsA)
             {
-                g.FillEllipse(Brushes.Black, p.X - 5, p.Y - 5, 10, 10);
+                g.FillEllipse(Brushes.Black, p.X - s, p.Y - s, 2 * s, 2 * s);
             }
 
             return bitmap;

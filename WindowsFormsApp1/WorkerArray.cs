@@ -9,7 +9,7 @@ namespace WindowsFormsApp1
 {
     public class WorkerArray
     {
-        public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
+        public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles, Size size, int s)
         {
             var particlesArr = particles.ToArray();
             var frames = new List<Frame>();
@@ -26,8 +26,8 @@ namespace WindowsFormsApp1
 
             stp = (float)0.1;
             t = 0;
-            SetAllPwCollisions(particlesArr, pwCollisions, size, t);
-            SetAllPpCollisions(particlesArr, ppCollisions, t);
+            SetAllPwCollisions(particlesArr, pwCollisions, size, s, t);
+            SetAllPpCollisions(particlesArr, ppCollisions, s, t);
             c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions);
             toc = c?.Dt ?? float.MaxValue;
             // tf - time of next frame
@@ -41,7 +41,7 @@ namespace WindowsFormsApp1
                     ttc = toc - t;
                     Move(particlesArr, ttc);
                     t = toc;
-                    ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, size, t);
+                    ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, size, s, t);
                     c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions);
                     toc = c?.Dt ?? float.MaxValue;
                     ttf = tof - t;
@@ -57,13 +57,13 @@ namespace WindowsFormsApp1
             return frames;
         }
 
-        private static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions, float t)
+        private static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions, int s, float t)
         {
             for (var i = 0; i < particles.Length; i++)
             {
                 for (var j = 0; j < particles.Length; j++)
                 {
-                    var dt = ComputeCollisionTime(particles[i].Pos, particles[i].Vel, particles[j].Pos, particles[j].Vel);
+                    var dt = ComputeCollisionTime(particles[i].Pos, particles[i].Vel, particles[j].Pos, particles[j].Vel, s);
                     dt = dt.HasValue ? dt + t : null;
                     ppCollisions[i][j] = dt;
                     ppCollisions[j][i] = dt;
@@ -76,21 +76,22 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void SetAllPwCollisions(Particle[] particles, float?[][] wallCollisions, Size size, float t)
+        private static void SetAllPwCollisions(Particle[] particles, float?[][] wallCollisions, Size size,
+            int s, float t)
         {
             for (var j = 0; j < particles.Length; j++)
             {
                 var i = particles[j];
                 var c = wallCollisions[j];
-                SetXWallCollisions(i.Pos, i.Vel, c, size, t);
-                SetYWallCollisions(i.Pos, i.Vel, c, size, t);
+                SetXWallCollisions(i.Pos, i.Vel, c, size, s, t);
+                SetYWallCollisions(i.Pos, i.Vel, c, size, s, t);
             }
         }
 
-        private static void SetYWallCollisions(Vector2 r, Vector2 v, float?[] c, Size size, float t)
+        private static void SetYWallCollisions(Vector2 r, Vector2 v, float?[] c, Size size, int s, float t)
         {
             float? dt;
-            float si = 5; // sigma, radius
+            float si = s;
 
             if (v.Y > 0)
             {
@@ -111,10 +112,10 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void SetXWallCollisions(Vector2 r, Vector2 v, float?[] c, Size size, float t)
+        private static void SetXWallCollisions(Vector2 r, Vector2 v, float?[] c, Size size, int s, float t)
         {
             float? dt;
-            float si = 5; // sigma, radius
+            float si = s;
 
             if (v.X > 0)
             {
@@ -212,11 +213,10 @@ namespace WindowsFormsApp1
             return new Collision(particles[particleIndex], particleIndex, minDt, true, "y");
         }
 
-        private static float? ComputeCollisionTime(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj)
+        private static float? ComputeCollisionTime(Vector2 ri, Vector2 vi, Vector2 rj, Vector2 vj, int s)
         {
-            float si = 5; // sigma, radius
-
-            float sj = 5;
+            float si = s;
+            float sj = s;
 
             Vector2 dr = rj - ri;
             Vector2 dv = vj - vi;
@@ -250,7 +250,7 @@ namespace WindowsFormsApp1
         }
 
         private static void ApplyCollision(Particle[] particles, Collision c, float?[][] pwCollisions,
-            float?[][] ppCollisions, Size size, float t)
+            float?[][] ppCollisions, Size size, int s, float t)
         {
             if (!c.IsWallCollision)
             {
@@ -259,10 +259,12 @@ namespace WindowsFormsApp1
                 var mi = 1;
                 var mj = 1;
 
-                double si = 5; // sigma, radius
-                double sj = 5;
+                double si = s; // sigma, radius
+                double sj = s;
 
-                var sigma = si + sj;
+                // in the source https://introcs.cs.princeton.edu/java/assignments/collisions.html
+                // si + sj is called sigma, but to avoid confusion it's called sij here
+                var sij = si + sj;
 
                 Vector2 dr = j.Pos - i.Pos;
 
@@ -270,10 +272,10 @@ namespace WindowsFormsApp1
 
                 var dvdr = dv.X * dr.X + dv.Y * dr.Y;
 
-                var J = (2 * mi * mj) * dvdr / (float)(sigma * (mi + mj));
+                var J = (2 * mi * mj) * dvdr / (float)(sij * (mi + mj));
 
-                var Jx = (J * dr.X) / sigma;
-                var Jy = (J * dr.Y) / sigma;
+                var Jx = (J * dr.X) / sij;
+                var Jy = (J * dr.Y) / sij;
 
                 var vxip = (i.Vel.X + Jx) / mi;
                 var vyip = (i.Vel.Y + Jy) / mi;
@@ -284,15 +286,15 @@ namespace WindowsFormsApp1
                 i.Vel = new Vector2((float)vxip, (float)vyip);
                 j.Vel = new Vector2((float)vxjp, (float)vyjp);
 
-                SetXWallCollisions(i.Pos, i.Vel, pwCollisions[c.IndexI], size, t);
-                SetYWallCollisions(i.Pos, i.Vel, pwCollisions[c.IndexI], size, t);
+                SetXWallCollisions(i.Pos, i.Vel, pwCollisions[c.IndexI], size, s, t);
+                SetYWallCollisions(i.Pos, i.Vel, pwCollisions[c.IndexI], size, s, t);
 
-                SetXWallCollisions(j.Pos, j.Vel, pwCollisions[c.IndexJ], size, t);
-                SetYWallCollisions(j.Pos, j.Vel, pwCollisions[c.IndexJ], size, t);
+                SetXWallCollisions(j.Pos, j.Vel, pwCollisions[c.IndexJ], size, s, t);
+                SetYWallCollisions(j.Pos, j.Vel, pwCollisions[c.IndexJ], size, s, t);
 
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
-                    var dt = ComputeCollisionTime(i.Pos, i.Vel, particles[k].Pos, particles[k].Vel);
+                    var dt = ComputeCollisionTime(i.Pos, i.Vel, particles[k].Pos, particles[k].Vel, s);
                     dt = dt.HasValue ? dt + t : null;
                     ppCollisions[c.IndexI][k] = dt;
                     ppCollisions[k][c.IndexI] = dt;
@@ -300,7 +302,7 @@ namespace WindowsFormsApp1
 
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
-                    var dt = ComputeCollisionTime(j.Pos, j.Vel, particles[k].Pos, particles[k].Vel);
+                    var dt = ComputeCollisionTime(j.Pos, j.Vel, particles[k].Pos, particles[k].Vel, s);
                     dt = dt.HasValue ? dt + t : null;
                     ppCollisions[c.IndexJ][k] = dt;
                     ppCollisions[k][c.IndexJ] = dt;
@@ -312,12 +314,12 @@ namespace WindowsFormsApp1
             else if (c.IsWallCollision && c.Wall == "x")
             {
                 c.ParticleI.Vel = c.ParticleI.Vel * new Vector2(-1, 1);
-                SetXWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, t);
-                SetYWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, t);
+                SetXWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, s, t);
+                SetYWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, s, t);
 
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
-                    var dt = ComputeCollisionTime(c.ParticleI.Pos, c.ParticleI.Vel, particles[k].Pos, particles[k].Vel);
+                    var dt = ComputeCollisionTime(c.ParticleI.Pos, c.ParticleI.Vel, particles[k].Pos, particles[k].Vel, s);
                     dt = dt.HasValue ? dt + t : null;
                     ppCollisions[c.IndexI][k] = dt;
                     ppCollisions[k][c.IndexI] = dt;
@@ -328,12 +330,12 @@ namespace WindowsFormsApp1
             else if (c.IsWallCollision && c.Wall == "y")
             {
                 c.ParticleI.Vel = c.ParticleI.Vel * new Vector2(1, -1);
-                SetXWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, t);
-                SetYWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, t);
+                SetXWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, s, t);
+                SetYWallCollisions(c.ParticleI.Pos, c.ParticleI.Vel, pwCollisions[c.IndexI], size, s, t);
 
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
-                    var dt = ComputeCollisionTime(c.ParticleI.Pos, c.ParticleI.Vel, particles[k].Pos, particles[k].Vel);
+                    var dt = ComputeCollisionTime(c.ParticleI.Pos, c.ParticleI.Vel, particles[k].Pos, particles[k].Vel, s);
                     dt = dt.HasValue ? dt + t : null;
                     ppCollisions[c.IndexI][k] = dt;
                     ppCollisions[k][c.IndexI] = dt;
