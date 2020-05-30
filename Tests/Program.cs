@@ -21,7 +21,7 @@ namespace Tests
             }
             else
             {
-                particles = ParticlesGenerator.RandomParticles(20, size, 5);
+                particles = ParticlesGenerator.RandomParticles(20, 5, size);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 

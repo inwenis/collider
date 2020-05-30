@@ -37,13 +37,8 @@ namespace WindowsFormsApp1
             }
             else
             {
-                particles = ParticlesGenerator.RandomParticles(options.NumberOfParticles, _size, s);
+                particles = ParticlesGenerator.RandomParticles(options.NumberOfParticles, s, _size);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
-            }
-
-            foreach (var particle in particles)
-            {
-                particle.Sig = 5;
             }
 
             var w = new WorkerArray();

@@ -8,7 +8,7 @@ namespace WindowsFormsApp1
 {
     public static class ParticlesGenerator
     {
-        public static List<Particle> RandomParticles(int count, Size size, int s)
+        public static List<Particle> RandomParticles(int count, int s, Size size)
         {
             var random = new Random(DateTimeOffset.UtcNow.Millisecond);
             var list = new List<Particle>();
@@ -16,8 +16,9 @@ namespace WindowsFormsApp1
             {
                 var particle = new Particle
                 {
-                    Pos = NextNonCollidingPosition(random, list, size, s),
-                    Vel = random.NextVector2(-2.5, 2.5, -2.5, 2.5)
+                    Pos = NextNonCollidingPosition(random, list, s, size),
+                    Vel = random.NextVector2(-2.5, 2.5, -2.5, 2.5),
+                    Sig = s
                 };
                 list.Add(particle);
             }
@@ -25,7 +26,7 @@ namespace WindowsFormsApp1
             return list;
         }
 
-        private static Vector2 NextNonCollidingPosition(Random random, List<Particle> existingParticles, Size size, int s)
+        private static Vector2 NextNonCollidingPosition(Random random, List<Particle> existingParticles, int s, Size size)
         {
             Vector2 position;
             int nonCollidingPpDistance = 2 * s + 1; // +1 is added to make sure particles do not overlap
