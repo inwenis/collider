@@ -27,14 +27,14 @@ namespace WindowsFormsApp1
                 return $"--{nameof(NumberOfFrames)}={NumberOfFrames} " +
                        $"--{nameof(Radius)}={Radius} " +
                        $"--{nameof(ParticlesFile)}={ParticlesFile} " +
-                       $"--{nameof(Dimensions)}={string.Join(",", Dimensions)}";
+                       $"--size={string.Join(",", Dimensions)}";
             }
             else
             {
                 return $"--{nameof(NumberOfFrames)}={NumberOfFrames} " +
                        $"--{nameof(Radius)}={Radius} " +
                        $"--{nameof(NumberOfParticles)}={NumberOfParticles} " +
-                       $"--{nameof(Dimensions)}={string.Join(",", Dimensions)}";
+                       $"--size={string.Join(",", Dimensions)}";
             }
         }
     }
