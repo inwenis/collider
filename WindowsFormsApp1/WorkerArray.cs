@@ -284,8 +284,8 @@ namespace WindowsFormsApp1
                 SetXWallCollisions(i.Pos, i.Vel, i.Sig, pwCollisions[c.IndexI], size, t);
                 SetYWallCollisions(i.Pos, i.Vel, i.Sig, pwCollisions[c.IndexI], size, t);
 
-                SetXWallCollisions(j.Pos, j.Vel, i.Sig, pwCollisions[c.IndexJ], size, t);
-                SetYWallCollisions(j.Pos, j.Vel, i.Sig, pwCollisions[c.IndexJ], size, t);
+                SetXWallCollisions(j.Pos, j.Vel, j.Sig, pwCollisions[c.IndexJ], size, t);
+                SetYWallCollisions(j.Pos, j.Vel, j.Sig, pwCollisions[c.IndexJ], size, t);
 
                 for (var k = 0; k < ppCollisions.Length; k++)
                 {
