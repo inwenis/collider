@@ -9,10 +9,10 @@ namespace WindowsFormsApp1
 {
     public class Worker
     {
-        public List<Frame> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
+        public List<Particle[]> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
         {
             var particlesArr = particles.ToArray();
-            var frames = new List<Frame>();
+            var frames = new List<Particle[]>();
 
             Collision c;
             float step; // seconds
@@ -47,11 +47,6 @@ namespace WindowsFormsApp1
             Debug.WriteLine($"Computed: {frames.Count} frames");
 
             return frames;
-        }
-
-        private static void AddFrame(List<Frame> frames, Particle[] particlesArr)
-        {
-            frames.Add(new Frame {Positions = particlesArr.Select(x => x.Pos).ToList()});
         }
 
         private Collision ComputeClosestCollision(Particle[] particles, Size size)
@@ -251,5 +246,11 @@ namespace WindowsFormsApp1
                 particle.Pos += Vector2.Multiply(particle.Vel, t);
             }
         }
+
+        private static void AddFrame(List<Particle[]> frames, Particle[] particlesArr)
+        {
+            frames.Add(particlesArr.Select(x => x.Clone()).ToArray());
+        }
+
     }
 }
