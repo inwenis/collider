@@ -51,7 +51,7 @@ namespace WindowsFormsApp1
             _mainForm.TrackBar1.Maximum = nFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
-            Timer t = new Timer(obj => PrintFrames(), null, 0, int.MaxValue);
+            Timer t = new Timer(obj => PrintFrames(), null, 500, -1);
 
             Application.Run(_mainForm);
         }
