@@ -43,6 +43,15 @@ namespace WindowsFormsApp1
                     t = toc;
                     ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, size, t);
                     c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions);
+
+                    while (c.Dt <= t)
+                    {
+                        Console.WriteLine("Computed collision with negative `time to collision`. This is likely a rounding error. Applying collision immediately");
+                        Console.WriteLine($"frame={i} t={t} c.Dt={c.Dt} c.Dt-t={c.Dt-t} particles={c.IndexI}/{c.IndexJ}");
+                        ApplyCollision(particlesArr, c, pwCollisions, ppCollisions, size, t);
+                        c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions);
+                    }
+
                     toc = c?.Dt ?? float.MaxValue;
                     ttf = tof - t;
                 }
