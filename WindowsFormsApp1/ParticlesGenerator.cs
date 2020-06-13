@@ -35,20 +35,5 @@ namespace WindowsFormsApp1
 
             return position;
         }
-
-        public static List<Particle> RandomFastParticles(int count)
-        {
-            var particles = new List<Particle>();
-            for (int i = 0; i < count; i++)
-            {
-                particles.Add(new Particle
-                {
-                    Pos = new Vector2(800, (i + 1) * 10),
-                    Vel = new Vector2(-20, 0)
-                });
-            }
-
-            return particles;
-        }
     }
 }
