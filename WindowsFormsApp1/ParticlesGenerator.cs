@@ -8,16 +8,17 @@ namespace WindowsFormsApp1
 {
     public static class ParticlesGenerator
     {
-        public static void AddRandomParticles(List<Particle> existingParticles, int count, int s, Size size)
+        public static void AddRandomParticles(List<Particle> existingParticles, int count, int sig, float mass, Size size)
         {
             var random = new Random(DateTimeOffset.UtcNow.Millisecond);
             for (int i = 0; i < count; i++)
             {
                 var particle = new Particle
                 {
-                    Pos = NextNonCollidingPosition(random, existingParticles, s, size),
+                    Pos = NextNonCollidingPosition(random, existingParticles, sig, size),
                     Vel = random.NextVector2(-2.5, 2.5, -2.5, 2.5),
-                    Sig = s
+                    Sig = sig,
+                    Mass = mass
                 };
                 existingParticles.Add(particle);
             }

@@ -192,7 +192,7 @@ namespace WindowsFormsApp1
                 ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt)
                 : null;
         }
-        
+
         private static Collision FindClosestPwCollision(Particle[] particles, float?[][] wallCollisions)
         {
             // PW collision - particle - wall collision
@@ -261,8 +261,8 @@ namespace WindowsFormsApp1
             {
                 var i = c.ParticleI;
                 var j = c.ParticleJ;
-                var mi = 1;
-                var mj = 1;
+                var mi = c.ParticleI.Mass;
+                var mj = c.ParticleJ.Mass;
                 var si = c.ParticleI.Sig;
                 var sj = c.ParticleJ.Sig;
 
