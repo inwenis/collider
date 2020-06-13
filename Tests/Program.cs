@@ -24,7 +24,7 @@ namespace Tests
             else
             {
                 particles = new List<Particle>();
-                ParticlesGenerator.AddRandomParticles(particles, 20, 5, 1,size);
+                ParticlesGenerator.AddRandomParticles(particles, 20, 5, 1, size);
                 var options = new Options(){NumberOfFrames = 20, Dimensions = new []{ 700, 400}};
                 var serializedToCsv = CsvSerializer.ToCsvFixedWidth(options, particles);
                 File.WriteAllText($"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml", serializedToCsv);
