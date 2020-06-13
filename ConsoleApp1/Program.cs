@@ -29,7 +29,7 @@ namespace ConsoleApp1
             File.WriteAllText("out3.csv", deserializedFromCsv);
         }
 
-        private static string ToCsvFixedWidth(Options options, List<Particle> particles)
+        public static string ToCsvFixedWidth(Options options, List<Particle> particles)
         {
             var top = ToCsvHeaders(options);
             var csv = ToCsvFixedWidth(particles);
@@ -45,6 +45,43 @@ namespace ConsoleApp1
             return s;
         }
 
+        private static string ToCsvFixedWidth(List<Particle> particles)
+        {
+            var sb = new StringBuilder();
+
+            // 46 = 10 + 35 + 1 (1 is for the decimal separating dot)
+            var header = $"{"positionX",46}|{"positionY",46}|{"velocityX",46}|{"velocityY",46}|{"radius",5}";
+            sb.AppendLine(header);
+
+            foreach (var p in particles)
+            {
+                var line = $"{Format(p.Pos.X, 10, 35)}|{Format(p.Pos.Y, 10, 35)}|{Format(p.Vel.X, 10, 35)}|{Format(p.Vel.Y, 10, 35)}|{p.Sig,5}";
+                sb.AppendLine(line);
+            }
+
+            return sb.ToString();
+
+            string Format(float f, int chartBeforeDot, int charsAfterDot)
+            {
+                var exactString = DoubleConverter.ToExactString(f);
+                var indexOfDot = exactString.IndexOf(".");
+                if (indexOfDot == -1)
+                {
+                    exactString += ".0";
+                    indexOfDot = exactString.IndexOf(".");
+                }
+                var spacesRight = charsAfterDot + 1 - (exactString.Length - indexOfDot);
+                var spacesLeft = chartBeforeDot - indexOfDot;
+                return $"{new string(' ', spacesLeft)}{exactString}{new string(' ', spacesRight)}";
+            }
+        }
+
+        public static void ParseCsv(string[] lines, out Options options, out IEnumerable<Particle> particles)
+        {
+            options = ParseFromCsvHeaders(lines);
+            particles = ParseParticles(lines);
+        }
+
         private static Options ParseFromCsvHeaders(string[] lines)
         {
             // expected format:
@@ -58,12 +95,6 @@ namespace ConsoleApp1
                 NumberOfFrames = int.Parse(n),
                 Dimensions = s.Select(x => int.Parse(x))
             };
-        }
-
-        private static void ParseCsv(string[] lines, out Options options, out IEnumerable<Particle> particles)
-        {
-            options = ParseFromCsvHeaders(lines);
-            particles = ParseParticles(lines);
         }
 
         private static IEnumerable<Particle> ParseParticles(string[] lines)
@@ -95,36 +126,6 @@ namespace ConsoleApp1
                     Vel = new Vector2(velX, velY),
                     Sig = sig
                 };
-            }
-        }
-
-        private static string ToCsvFixedWidth(List<Particle> particles)
-        {
-            var sb = new StringBuilder();
-
-            var header = $"{"positionX",46}|{"positionY",46}|{"velocityX",46}|{"velocityY",46}|{"radius",5}";
-            sb.AppendLine(header);
-
-            foreach (var p in particles)
-            {
-                var line = $"{Format(p.Pos.X, 10, 35)}|{Format(p.Pos.Y, 10, 35)}|{Format(p.Vel.X, 10, 35)}|{Format(p.Vel.Y, 10, 35)}|{p.Sig,5}";
-                sb.AppendLine(line);
-            }
-
-            return sb.ToString();
-
-            string Format(float f, int chartBeforeDot, int charsAfterDot)
-            {
-                var exactString = DoubleConverter.ToExactString(f);
-                var indexOfDot = exactString.IndexOf(".");
-                if (indexOfDot == -1)
-                {
-                    exactString += ".0";
-                    indexOfDot = exactString.IndexOf(".");
-                }
-                var spacesRight = charsAfterDot + 1 - (exactString.Length - indexOfDot);
-                var spacesLeft = chartBeforeDot - indexOfDot;
-                return $"{new string(' ', spacesLeft)}{exactString}{new string(' ', spacesRight)}";
             }
         }
     }
