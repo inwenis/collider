@@ -1,4 +1,5 @@
-﻿using System;
+﻿// from: https://csharpindepth.com/Articles/FloatingPoint
+using System;
 using System.Globalization;
 
 namespace ConsoleApp1
