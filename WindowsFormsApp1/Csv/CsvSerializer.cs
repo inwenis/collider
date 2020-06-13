@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WindowsFormsApp1.Csv
 {
-    class CsvSerializer
+    public class CsvSerializer
     {
         public static string ToCsvFixedWidth(Options options, List<Particle> particles)
         {

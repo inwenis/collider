@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using WindowsFormsApp1;
+using WindowsFormsApp1.Csv;
 
 namespace Tests
 {
@@ -14,16 +15,19 @@ namespace Tests
             var nFrames = 6000;
             var size = new Size(700, 400);
 
-            List<Particle> particles;
-            if (File.Exists("input.xml"))
+            List<Particle> particles = null;
+            if (File.Exists("input.csv"))
             {
-                particles = Tools.ReadFromFile("input.xml");
+                CsvSerializer.ParseCsv(File.ReadAllLines("input.xml"), out var options, out var outParticles);
+                particles = outParticles.ToList();
             }
             else
             {
                 particles = new List<Particle>();
                 ParticlesGenerator.AddRandomParticles(particles, 20, 5, size);
-                Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
+                var options = new Options(){NumberOfFrames = 20, Dimensions = new []{ 700, 400}};
+                var serializedToCsv = CsvSerializer.ToCsvFixedWidth(options, particles);
+                File.WriteAllText($"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml", serializedToCsv);
             }
 
             var wA = new Worker();

@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
 
 namespace WindowsFormsApp1
 {
@@ -26,25 +24,6 @@ namespace WindowsFormsApp1
             }
 
             return (framesWithDifferences, framesComparisons);
-        }
-
-        public static void DumpToFile(List<Particle> particles, string fileName)
-        {
-            XmlSerializer ser = new XmlSerializer(typeof(List<Particle>));
-            TextWriter writer = new StreamWriter(fileName);
-            ser.Serialize(writer, particles);
-            writer.Close();
-        }
-
-        public static List<Particle> ReadFromFile(string fileName)
-        {
-            XmlSerializer ser = new XmlSerializer(typeof(List<Particle>));
-            using (var reader = new StreamReader(fileName))
-            {
-                var deserialize = ser.Deserialize(reader);
-                reader.Close();
-                return (List<Particle>) deserialize;
-            }
         }
     }
 
