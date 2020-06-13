@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 using WindowsFormsApp1;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -35,10 +34,18 @@ namespace ConsoleApp1
             }
 
             var csvfw = ToCsvFixedWidth(particles);
-            File.WriteAllText("out2.csv", csvfw);
+            var options = new Options()
+            {
+                Dimensions = new[] {800, 800},
+                NumberOfFrames = 1000,
+                NumberOfParticles = 100,
+                Radius = 5
+            };
+            var top = ToCsvHeaders(options);
+            File.WriteAllText("out2.csv", top + csvfw);
 
             var allLines = File.ReadAllLines("out2.csv");
-            var particles2 = Read(allLines);
+            Read(allLines, out List<Particle> particles2, out Options options2);
 
             csvfw = ToCsvFixedWidth(particles2.ToList());
             File.WriteAllText("out3.csv", csvfw);
@@ -47,13 +54,20 @@ namespace ConsoleApp1
             Console.ReadKey();
         }
 
-        private static IEnumerable<Particle> Read(string[] allLines)
+        private static string ToCsvHeaders(Options op)
         {
-            var header = allLines[0];
+            var s = $"{nameof(op.NumberOfFrames)}={op.NumberOfFrames}\n" +
+                    $"size={string.Join(",", op.Dimensions)}\n";
+            return s;
+        }
+
+        private static void Read(string[] allLines, out List<Particle> particles, out Options options)
+        {
+            var header = allLines[2];
             var split = header.Split('|');
             var headers = split.Select(x => x.Replace(" ", ""));
             var rows = new List<Dictionary<string, string>>();
-            foreach (var row in allLines.Skip(1))
+            foreach (var row in allLines.Skip(3))
             {
                 split = row.Split('|');
                 var values = split.Select(x => x.Replace(" ", ""));
@@ -61,8 +75,15 @@ namespace ConsoleApp1
                 rows.Add(rowAsDict);
             }
 
-            var particles = rows.Select(x => ToParticle(x));
-            return particles;
+            particles = rows.Select(x => ToParticle(x)).ToList();
+
+            var n = allLines[0].Split('=')[1];
+            var dims = allLines[1].Split('=')[1].Split(',');
+            options = new Options
+            {
+                NumberOfFrames = int.Parse(n),
+                Dimensions = dims.Select(x => int.Parse(x))
+            };
         }
 
         private static Particle ToParticle(Dictionary<string, string> dictionary)

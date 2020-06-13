@@ -3,7 +3,7 @@ using CommandLine;
 
 namespace WindowsFormsApp1
 {
-    class Options
+    public class Options
     {
         [Option('f', "frames", Required = false, Default = 1000)]
         public int NumberOfFrames { get; set; }
