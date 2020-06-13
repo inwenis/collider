@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using System.Numerics;
+using WindowsFormsApp1.Csv;
 using CommandLine;
 using Timer = System.Threading.Timer;
 
@@ -25,30 +28,33 @@ namespace WindowsFormsApp1
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var nFrames = options.NumberOfFrames;
-            var size = options.Dimensions.ToArray();
-            _size = new Size(size[0], size[1]);
-            var s = options.Radius; // sigma - radius of particles
-
             List<Particle> particles;
             if (options.ParticlesFile != null)
             {
-                particles = Tools.ReadFromFile(options.ParticlesFile);
+                var lines = File.ReadAllLines(options.ParticlesFile);
+                CsvSerializer.ParseCsv(lines, out options, out var outParticles);
+                particles = outParticles.ToList();
+
+                var size = options.Dimensions.ToArray();
+                _size = new Size(size[0], size[1]);
             }
             else
             {
+                var size = options.Dimensions.ToArray();
+                _size = new Size(size[0], size[1]);
+
                 particles = new List<Particle> {new Particle {Pos = new Vector2(100, 100), Vel = Vector2.Zero, Sig = 20}};
-                ParticlesGenerator.AddRandomParticles(particles, options.NumberOfParticles, s, _size);
+                ParticlesGenerator.AddRandomParticles(particles, options.NumberOfParticles, options.Radius, _size);
                 Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
             }
 
             var w = new WorkerArray();
 
-            _frames = w.Simulate(nFrames, particles, _size);
+            _frames = w.Simulate(options.NumberOfFrames, particles, _size);
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
-            _mainForm.TrackBar1.Maximum = nFrames - 1;
+            _mainForm.TrackBar1.Maximum = options.NumberOfFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
             Timer t = new Timer(obj => PrintFrames(), null, 500, -1); // wait 500ms before starting timer to let window be created

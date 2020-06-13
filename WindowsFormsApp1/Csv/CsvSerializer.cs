@@ -1,34 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using WindowsFormsApp1;
 
-namespace ConsoleApp1
+namespace WindowsFormsApp1.Csv
 {
-    class Program
+    class CsvSerializer
     {
-        static void Main(string[] args)
-        {
-            var particles = Tools.ReadFromFile(@"C:\git\collider\WindowsFormsApp1\bin\Debug\2020-06-12--23-20-03.xml");
-            var options = new Options
-            {
-                Dimensions = new[] {800, 800},
-                NumberOfFrames = 1000,
-            };
-
-            var serializedToCsv = ToCsvFixedWidth(options, particles);
-            File.WriteAllText("out2.csv", serializedToCsv);
-
-            var allLines = File.ReadAllLines("out2.csv");
-            ParseCsv(allLines, out var options2, out var particles2);
-
-            var deserializedFromCsv = ToCsvFixedWidth(particles2.ToList());
-            File.WriteAllText("out3.csv", deserializedFromCsv);
-        }
-
         public static string ToCsvFixedWidth(Options options, List<Particle> particles)
         {
             var top = ToCsvHeaders(options);
