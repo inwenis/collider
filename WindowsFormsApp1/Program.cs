@@ -45,7 +45,9 @@ namespace WindowsFormsApp1
 
                 particles = new List<Particle> {new Particle {Pos = new Vector2(100, 100), Vel = Vector2.Zero, Sig = 20}};
                 ParticlesGenerator.AddRandomParticles(particles, options.NumberOfParticles, options.Radius, _size);
-                Tools.DumpToFile(particles, $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml");
+
+                var serializedToCsv = CsvSerializer.ToCsvFixedWidth(options, particles);
+                File.WriteAllText($"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml", serializedToCsv);
             }
 
             var w = new WorkerArray();
