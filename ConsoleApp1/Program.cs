@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using WindowsFormsApp1;
-using CsvHelper;
-using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
 
 namespace ConsoleApp1
 {
@@ -16,39 +12,22 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(MagicFormat(3.5f));
-            Console.WriteLine(MagicFormat(3.51f));
-            Console.WriteLine(MagicFormat(1.51f));
-            Console.WriteLine(MagicFormat(12.51f));
-            Console.WriteLine(MagicFormat(-12.51f));
-
-            //Console.ReadLine();
-
             var particles = Tools.ReadFromFile(@"C:\git\collider\WindowsFormsApp1\bin\Debug\2020-06-12--23-20-03.xml");
-            using (var writer = new StreamWriter("out.csv"))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-            {
-                csv.Configuration.RegisterClassMap<FooMap>();
-                csv.WriteRecords(particles);
-                writer.Flush();
-            }
 
-            var csvfw = ToCsvFixedWidth(particles);
-            var options = new Options()
+            var csv = ToCsvFixedWidth(particles);
+            var options = new Options
             {
                 Dimensions = new[] {800, 800},
                 NumberOfFrames = 1000,
-                NumberOfParticles = 100,
-                Radius = 5
             };
             var top = ToCsvHeaders(options);
-            File.WriteAllText("out2.csv", top + csvfw);
+            File.WriteAllText("out2.csv", top + csv);
 
             var allLines = File.ReadAllLines("out2.csv");
             Read(allLines, out List<Particle> particles2, out Options options2);
 
-            csvfw = ToCsvFixedWidth(particles2.ToList());
-            File.WriteAllText("out3.csv", csvfw);
+            csv = ToCsvFixedWidth(particles2.ToList());
+            File.WriteAllText("out3.csv", csv);
 
             Console.WriteLine(particles2);
             Console.ReadKey();
@@ -131,32 +110,6 @@ namespace ConsoleApp1
             }
 
             return sb.ToString();
-        }
-    }
-
-    public class Vector2Converter : DefaultTypeConverter
-    {
-        public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
-        {
-            return "";
-            //return JsonConvert.DeserializeObject<T>(text);
-        }
-
-        public override string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
-        {
-            Vector2 v = (Vector2) value;
-            return $"({v.X} {v.Y})";
-        }
-    }
-
-    public class FooMap : ClassMap<Particle>
-    {
-        public FooMap()
-        {
-            //Map(m => m.Id);
-            //Map(m => m.Name);
-            Map(m => m.Pos).TypeConverter<Vector2Converter>();
-            Map(m => m.Vel).TypeConverter<Vector2Converter>();
         }
     }
 }
