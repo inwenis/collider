@@ -13,21 +13,27 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             var particles = Tools.ReadFromFile(@"C:\git\collider\WindowsFormsApp1\bin\Debug\2020-06-12--23-20-03.xml");
-
-            var csv = ToCsvFixedWidth(particles);
             var options = new Options
             {
                 Dimensions = new[] {800, 800},
                 NumberOfFrames = 1000,
             };
-            var top = ToCsvHeaders(options);
-            File.WriteAllText("out2.csv", top + csv);
+
+            var serializedToCsv = ToCsvFixedWidth(options, particles);
+            File.WriteAllText("out2.csv", serializedToCsv);
 
             var allLines = File.ReadAllLines("out2.csv");
-            ParseCsv(allLines, out IEnumerable<Particle> particles2, out Options options2);
+            ParseCsv(allLines, out var options2, out var particles2);
 
-            csv = ToCsvFixedWidth(particles2.ToList());
-            File.WriteAllText("out3.csv", csv);
+            var deserializedFromCsv = ToCsvFixedWidth(particles2.ToList());
+            File.WriteAllText("out3.csv", deserializedFromCsv);
+        }
+
+        private static string ToCsvFixedWidth(Options options, List<Particle> particles)
+        {
+            var top = ToCsvHeaders(options);
+            var csv = ToCsvFixedWidth(particles);
+            return $"{top}{csv}";
         }
 
         private static string ToCsvHeaders(Options o)
@@ -54,11 +60,10 @@ namespace ConsoleApp1
             };
         }
 
-
-        private static void ParseCsv(string[] lines, out IEnumerable<Particle> particles, out Options options)
+        private static void ParseCsv(string[] lines, out Options options, out IEnumerable<Particle> particles)
         {
-            particles = ParseParticles(lines);
             options = ParseFromCsvHeaders(lines);
+            particles = ParseParticles(lines);
         }
 
         private static IEnumerable<Particle> ParseParticles(string[] lines)
@@ -93,36 +98,34 @@ namespace ConsoleApp1
             }
         }
 
-        private static string MagicFormat(float f)
-        {
-            var exactString = DoubleConverter.ToExactString(f);
-            var indexOf = exactString.IndexOf(".");
-            if (indexOf == -1)
-            {
-                exactString += ".0";
-            }
-            indexOf = exactString.IndexOf(".");
-            var addZeroestoRight = 36 - (exactString.Length - indexOf);
-            var spacesLeft = 10 - indexOf;
-            var x = string.Join("", Enumerable.Repeat(" ", addZeroestoRight));
-            var y = string.Join("", Enumerable.Repeat(" ", spacesLeft));
-            return y + exactString + x;
-        }
-
         private static string ToCsvFixedWidth(List<Particle> particles)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             var header = $"{"positionX",46}|{"positionY",46}|{"velocityX",46}|{"velocityY",46}|{"radius",5}";
             sb.AppendLine(header);
 
             foreach (var p in particles)
             {
-                var line = $"{MagicFormat(p.Pos.X)}|{MagicFormat(p.Pos.Y)}|{MagicFormat(p.Vel.X)}|{MagicFormat(p.Vel.Y)}|{p.Sig,5}";
+                var line = $"{Format(p.Pos.X, 10, 35)}|{Format(p.Pos.Y, 10, 35)}|{Format(p.Vel.X, 10, 35)}|{Format(p.Vel.Y, 10, 35)}|{p.Sig,5}";
                 sb.AppendLine(line);
             }
 
             return sb.ToString();
+
+            string Format(float f, int chartBeforeDot, int charsAfterDot)
+            {
+                var exactString = DoubleConverter.ToExactString(f);
+                var indexOfDot = exactString.IndexOf(".");
+                if (indexOfDot == -1)
+                {
+                    exactString += ".0";
+                    indexOfDot = exactString.IndexOf(".");
+                }
+                var spacesRight = charsAfterDot + 1 - (exactString.Length - indexOfDot);
+                var spacesLeft = chartBeforeDot - indexOfDot;
+                return $"{new string(' ', spacesLeft)}{exactString}{new string(' ', spacesRight)}";
+            }
         }
     }
 }
