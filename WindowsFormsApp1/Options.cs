@@ -14,7 +14,7 @@ namespace WindowsFormsApp1
         [Option('r', "radius", Required = false, Default = 5)]
         public int Radius { get; set; }
 
-        [Option('i', "particlesFile", Required = false)]
+        [Option('i', "file", Required = false)]
         public string ParticlesFile  { get; set; }
 
         [Option('s', "size", Separator = ',', Min = 2, Max = 2, Required = false, Default = new []{ 400, 400})]

@@ -22,8 +22,6 @@ namespace WindowsFormsApp1
             var parserResult = Parser.Default.ParseArguments<Options>(args);
             var options = ((Parsed<Options>) parserResult).Value;
 
-            Console.WriteLine($"To rerun with same arguments use: {options.ToInputArgumentsString()}");
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -31,6 +29,7 @@ namespace WindowsFormsApp1
             if (options.ParticlesFile != null)
             {
                 var lines = File.ReadAllLines(options.ParticlesFile);
+                // not super happy about this code cuz we overwrite options here
                 CsvSerializer.ParseCsv(lines, out options, out var outParticles);
                 particles = outParticles.ToList();
 
@@ -46,7 +45,9 @@ namespace WindowsFormsApp1
                 ParticlesGenerator.AddRandomParticles(particles, options.NumberOfParticles, options.Radius, _size);
 
                 var serializedToCsv = CsvSerializer.ToCsvFixedWidth(options, particles);
-                File.WriteAllText($"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml", serializedToCsv);
+                var fileName = $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml";
+                File.WriteAllText(fileName, serializedToCsv);
+                Console.WriteLine($"Particles saved to {fileName}. To rerun use: --file={fileName}");
             }
 
             var w = new WorkerArray();
