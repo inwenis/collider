@@ -261,8 +261,8 @@ namespace WindowsFormsApp1
             {
                 var i = c.ParticleI;
                 var j = c.ParticleJ;
-                var mi = 1;
-                var mj = 1;
+                var mi = c.ParticleI.Mass;
+                var mj = c.ParticleJ.Mass;
                 var si = c.ParticleI.Sig;
                 var sj = c.ParticleJ.Sig;
 

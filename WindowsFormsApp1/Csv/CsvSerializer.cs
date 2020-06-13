@@ -28,12 +28,12 @@ namespace WindowsFormsApp1.Csv
             var sb = new StringBuilder();
 
             // 46 = 10 + 35 + 1 (1 is for the decimal separating dot)
-            var header = $"{"positionX",46}|{"positionY",46}|{"velocityX",46}|{"velocityY",46}|{"radius",5}";
+            var header = $"{"positionX",46}|{"positionY",46}|{"velocityX",46}|{"velocityY",46}|{"mass",46}|{"radius",5}";
             sb.AppendLine(header);
 
             foreach (var p in particles)
             {
-                var line = $"{Format(p.Pos.X, 10, 35)}|{Format(p.Pos.Y, 10, 35)}|{Format(p.Vel.X, 10, 35)}|{Format(p.Vel.Y, 10, 35)}|{p.Sig,5}";
+                var line = $"{Format(p.Pos.X, 10, 35)}|{Format(p.Pos.Y, 10, 35)}|{Format(p.Vel.X, 10, 35)}|{Format(p.Vel.Y, 10, 35)}|{Format(p.Mass, 10, 35)}|{p.Sig,5}";
                 sb.AppendLine(line);
             }
 
@@ -97,12 +97,14 @@ namespace WindowsFormsApp1.Csv
                 var posY = float.Parse(dictionary["positionY"]);
                 var velX = float.Parse(dictionary["velocityX"]);
                 var velY = float.Parse(dictionary["velocityY"]);
+                var mass = float.Parse(dictionary["mass"]);
                 var sig = int.Parse(dictionary["radius"]);
                 return new Particle
                 {
                     Pos = new Vector2(posX, posY),
                     Vel = new Vector2(velX, velY),
-                    Sig = sig
+                    Sig = sig,
+                    Mass = mass
                 };
             }
         }
