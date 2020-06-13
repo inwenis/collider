@@ -28,9 +28,6 @@ namespace ConsoleApp1
 
             csv = ToCsvFixedWidth(particles2.ToList());
             File.WriteAllText("out3.csv", csv);
-
-            Console.WriteLine(particles2);
-            Console.ReadKey();
         }
 
         private static string ToCsvHeaders(Options o)
