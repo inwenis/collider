@@ -192,7 +192,7 @@ namespace WindowsFormsApp1
                 ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt)
                 : null;
         }
-        
+
         private static Collision FindClosestPwCollision(Particle[] particles, float?[][] wallCollisions)
         {
             // PW collision - particle - wall collision
