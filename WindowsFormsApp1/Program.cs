@@ -76,9 +76,11 @@ namespace WindowsFormsApp1
             });
 
             Console.WriteLine("Printing frames");
+            var max = frames.SelectMany(x => x).Select(x => x.Vel.Length()).ToList().Max();
+
             _framesAsGifs = frames
                 .AsParallel()
-                .Select(x => FrameToGifBytes(x, _size))
+                .Select(x => FrameToGifBytes(x, _size, max))
                 .ToList();
 
             _mainForm = new Form1();
@@ -128,7 +130,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static byte[] FrameToGifBytes(Particle[] particles, Size size)
+        private static byte[] FrameToGifBytes(Particle[] particles, Size size, double maxSpeed)
         {
             // add 1 so there is space to print the border
             using (var bitmap = new Bitmap(size.Width + 1, size.Height + 1))
@@ -143,7 +145,9 @@ namespace WindowsFormsApp1
 
                 foreach (var p in particles)
                 {
-                    g.FillEllipse(Brushes.Black, p.Pos.X - p.Sig, p.Pos.Y - p.Sig, 2 * p.Sig, 2 * p.Sig);
+                    var scale = (int)(p.Vel.Length() / maxSpeed * 255);
+                    var brush = new SolidBrush(Color.FromArgb(Math.Min(scale, 255), 0, 0));
+                    g.FillEllipse(brush, p.Pos.X - p.Sig, p.Pos.Y - p.Sig, 2 * p.Sig, 2 * p.Sig);
                 }
                 bitmap.Save(memStream, ImageFormat.Gif);
                 return memStream.ToArray();
