@@ -4,12 +4,28 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace WindowsFormsApp1
 {
     public class WorkerArray
     {
-        public List<Particle[]> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
+        public async Task<List<Particle[]>> SimulateAsync(int nFrames, List<Particle> particles, Size size, IProgress<int> progress)
+        {
+            return await Task.Run(() =>
+            {
+                var frames = new List<Particle[]>();
+                int i = 0;
+                foreach (var frame in Simulate(nFrames, particles, size))
+                {
+                    progress.Report(i++);
+                    frames.Add(frame);
+                }
+                return frames;
+            });
+        }
+
+        public IEnumerable<Particle[]> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
         {
             var particlesArr = particles.ToArray();
             var frames = new List<Particle[]>();
@@ -57,13 +73,12 @@ namespace WindowsFormsApp1
                 }
 
                 Move(particlesArr, ttf);
-                AddFrame(frames, particlesArr);
+                //AddFrame(frames, particlesArr);
+                yield return Frame(particlesArr);
                 t = tof;
             }
 
             Debug.WriteLine($"Computed: {frames.Count} frames");
-
-            return frames;
         }
 
         private static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions, float t)
@@ -359,7 +374,13 @@ namespace WindowsFormsApp1
 
         private static void AddFrame(List<Particle[]> frames, Particle[] particlesArr)
         {
-            frames.Add(particlesArr.Select(x => x.Clone()).ToArray());
+            var frame = Frame(particlesArr);
+            frames.Add(frame);
+        }
+
+        private static Particle[] Frame(Particle[] particlesArr)
+        {
+            return particlesArr.Select(x => x.Clone()).ToArray();
         }
     }
 }

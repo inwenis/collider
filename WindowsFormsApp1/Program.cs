@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Numerics;
+using System.Threading.Tasks;
 using WindowsFormsApp1.Csv;
 using CommandLine;
 using Timer = System.Threading.Timer;
@@ -17,7 +18,7 @@ namespace WindowsFormsApp1
         private static List<Particle[]> _frames;
         private static Size _size;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var parserResult = Parser.Default.ParseArguments<Options>(args);
             var options = ((Parsed<Options>) parserResult).Value;
@@ -52,7 +53,13 @@ namespace WindowsFormsApp1
 
             var w = new WorkerArray();
 
-            _frames = w.Simulate(options.NumberOfFrames, particles, _size);
+            _frames = await w.SimulateAsync(options.NumberOfFrames, particles, _size, new Progress<int>((a) =>
+            {
+                if (a % 100 == 0)
+                {
+                    Console.WriteLine((double)a/options.NumberOfFrames);
+                }
+            }));
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
