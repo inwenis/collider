@@ -45,7 +45,7 @@ namespace WindowsFormsApp1
                 ParticlesGenerator.AddRandomParticles(particles, options.NumberOfParticles, options.Radius, 1, _size);
 
                 var serializedToCsv = CsvSerializer.ToCsvFixedWidth(options, particles);
-                var fileName = $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml";
+                var fileName = $"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.csv";
                 File.WriteAllText(fileName, serializedToCsv);
                 Console.WriteLine($"Particles saved to {fileName}. To rerun use: --file={fileName}");
             }
