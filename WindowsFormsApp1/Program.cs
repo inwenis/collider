@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -53,11 +54,20 @@ namespace WindowsFormsApp1
 
             var w = new WorkerArray();
 
-            _frames = await w.SimulateAsync(options.NumberOfFrames, particles, _size, new Progress<int>((a) =>
+            var n = options.NumberOfFrames;
+            var i = n / 100;
+            var sw = Stopwatch.StartNew();
+            _frames = await w.SimulateAsync(n, particles, _size, new Progress<int>((a) =>
             {
-                if (a % 100 == 0)
+                if (a % i == 0)
                 {
-                    Console.WriteLine((double)a/options.NumberOfFrames);
+                    var completed = (double)a/options.NumberOfFrames;
+                    var sofar = sw.Elapsed;
+                    var etatot = a != 0
+                        ? TimeSpan.FromMilliseconds(sw.ElapsedMilliseconds / completed)
+                        : TimeSpan.MaxValue;
+                    var rem = etatot - sofar;
+                    Console.WriteLine($"{completed,4} tp={sofar} tt={etatot} rem={rem}");
                 }
             }));
 
