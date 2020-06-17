@@ -9,7 +9,7 @@ namespace WindowsFormsApp1
 {
     public class WorkerArray
     {
-        public IEnumerable<Particle[]> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
+        public IEnumerable<Particle[]> Simulate(IEnumerable<Particle> particles, Size size)
         {
             var particlesArr = particles.ToArray();
             var frames = new List<Particle[]>();
@@ -30,11 +30,9 @@ namespace WindowsFormsApp1
             SetAllPpCollisions(particlesArr, ppCollisions, t);
             c = FindClosestCollision(particlesArr, pwCollisions, ppCollisions);
             toc = c?.Dt ?? float.MaxValue;
-            // tf - time of next frame
-            var timeOfFrames = Enumerable.Range(0, nFrames).Select(x => x * stp).ToArray();
-            for (var i = 0; i < timeOfFrames.Length; i++)
+            for (var i = 0; i < int.MaxValue; i++)
             {
-                var tof = timeOfFrames[i];
+                var tof = i * stp;
                 ttf = tof - t;
                 while (toc < tof)
                 {
