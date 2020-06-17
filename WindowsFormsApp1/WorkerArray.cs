@@ -9,7 +9,7 @@ namespace WindowsFormsApp1
 {
     public class WorkerArray
     {
-        public List<Particle[]> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
+        public IEnumerable<Particle[]> Simulate(int nFrames, IEnumerable<Particle> particles, Size size)
         {
             var particlesArr = particles.ToArray();
             var frames = new List<Particle[]>();
@@ -57,13 +57,11 @@ namespace WindowsFormsApp1
                 }
 
                 Move(particlesArr, ttf);
-                AddFrame(frames, particlesArr);
+                yield return CreateFrame(particlesArr);
                 t = tof;
             }
 
             Debug.WriteLine($"Computed: {frames.Count} frames");
-
-            return frames;
         }
 
         private static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions, float t)
@@ -357,9 +355,9 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void AddFrame(List<Particle[]> frames, Particle[] particlesArr)
+        private static Particle[] CreateFrame(Particle[] particlesArr)
         {
-            frames.Add(particlesArr.Select(x => x.Clone()).ToArray());
+            return particlesArr.Select(x => x.Clone()).ToArray();
         }
     }
 }

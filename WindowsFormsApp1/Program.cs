@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Numerics;
+using System.Threading.Tasks;
 using WindowsFormsApp1.Csv;
 using CommandLine;
 using Timer = System.Threading.Timer;
@@ -17,7 +19,7 @@ namespace WindowsFormsApp1
         private static List<Particle[]> _frames;
         private static Size _size;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var parserResult = Parser.Default.ParseArguments<Options>(args);
             var options = ((Parsed<Options>) parserResult).Value;
@@ -52,7 +54,20 @@ namespace WindowsFormsApp1
 
             var w = new WorkerArray();
 
-            _frames = w.Simulate(options.NumberOfFrames, particles, _size);
+            _frames = await Task.Run(() =>
+            {
+                var frames = new List<Particle[]>();
+                var sw = Stopwatch.StartNew();
+                foreach (var (frame, i) in w
+                    .Simulate(options.NumberOfFrames, particles, _size)
+                    .Select((frame, i) => (frame, i)))
+                {
+                    HandleProgress(i, options.NumberOfFrames, sw.Elapsed);
+                    frames.Add(frame);
+                }
+                sw.Stop();
+                return frames;
+            });
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
@@ -62,6 +77,19 @@ namespace WindowsFormsApp1
             Timer t = new Timer(obj => PrintFrames(), null, 500, -1); // wait 500ms before starting timer to let window be created
 
             Application.Run(_mainForm);
+        }
+
+        private static void HandleProgress(int currentItem, int totalItems, TimeSpan elapsed)
+        {
+            if (currentItem % (totalItems / 100) == 0) // print 100 progress updates
+            {
+                var progress = (double)currentItem / totalItems;
+                var tte = currentItem != 0 // total time estimated
+                    ? TimeSpan.FromMilliseconds(elapsed.TotalMilliseconds / progress)
+                    : TimeSpan.MaxValue;
+                var rem = tte - elapsed; // remaining
+                Console.WriteLine($"{progress*100,3}% passed={elapsed} total estimated={tte} remaining={rem}");
+            }
         }
 
         private static void TrackBar1_Scroll(object sender, EventArgs e)
