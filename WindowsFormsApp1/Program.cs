@@ -52,20 +52,6 @@ namespace WindowsFormsApp1
                 Console.WriteLine($"Particles saved to {fileName}. To rerun use: --file={fileName}");
             }
 
-            void Handler(int progress, int total, TimeSpan elapsed)
-            {
-                if (progress % (total/100) == 0)
-                {
-                    var completed = (double)progress / total;
-                    var sofar = elapsed;
-                    var etatot = progress != 0
-                        ? TimeSpan.FromMilliseconds(sofar.TotalMilliseconds / completed)
-                        : TimeSpan.MaxValue;
-                    var rem = etatot - sofar;
-                    Console.WriteLine($"{completed,5:0.00} tp={sofar} tt={etatot} rem={rem}");
-                }
-            }
-
             var w = new WorkerArray();
 
             _frames = await Task.Run(() =>
@@ -76,7 +62,7 @@ namespace WindowsFormsApp1
                     .Simulate(options.NumberOfFrames, particles, _size)
                     .Select((x, y) => (x, y)))
                 {
-                    Handler(i, options.NumberOfFrames, sw.Elapsed);
+                    HandleProgress(i, options.NumberOfFrames, sw.Elapsed);
                     frames.Add(frame);
                 }
                 sw.Stop();
@@ -91,6 +77,19 @@ namespace WindowsFormsApp1
             Timer t = new Timer(obj => PrintFrames(), null, 500, -1); // wait 500ms before starting timer to let window be created
 
             Application.Run(_mainForm);
+        }
+
+        private static void HandleProgress(int currentItem, int totalItems, TimeSpan elapsed)
+        {
+            if (currentItem % (totalItems / 100) == 0) // print 100 progress updates
+            {
+                var progress = (double)currentItem / totalItems;
+                var tte = currentItem != 0 // total time estimated
+                    ? TimeSpan.FromMilliseconds(elapsed.TotalMilliseconds / progress)
+                    : TimeSpan.MaxValue;
+                var rem = tte - elapsed; // remaining
+                Console.WriteLine($"{progress,5:0.00} tp={elapsed} tt={tte} rem={rem}");
+            }
         }
 
         private static void TrackBar1_Scroll(object sender, EventArgs e)
