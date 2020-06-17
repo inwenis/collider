@@ -57,8 +57,7 @@ namespace WindowsFormsApp1
                 }
 
                 Move(particlesArr, ttf);
-                //AddFrame(frames, particlesArr);
-                yield return Frame(particlesArr);
+                yield return CreateFrame(particlesArr);
                 t = tof;
             }
 
@@ -356,13 +355,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private static void AddFrame(List<Particle[]> frames, Particle[] particlesArr)
-        {
-            var frame = Frame(particlesArr);
-            frames.Add(frame);
-        }
-
-        private static Particle[] Frame(Particle[] particlesArr)
+        private static Particle[] CreateFrame(Particle[] particlesArr)
         {
             return particlesArr.Select(x => x.Clone()).ToArray();
         }
