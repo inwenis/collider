@@ -56,11 +56,11 @@ namespace WindowsFormsApp1
 
             _frames = await Task.Run(() =>
             {
-                var sw = Stopwatch.StartNew();
                 var frames = new List<Particle[]>();
+                var sw = Stopwatch.StartNew();
                 foreach (var (frame, i) in w
                     .Simulate(options.NumberOfFrames, particles, _size)
-                    .Select((x, y) => (x, y)))
+                    .Select((frame, i) => (frame, i)))
                 {
                     HandleProgress(i, options.NumberOfFrames, sw.Elapsed);
                     frames.Add(frame);
@@ -88,7 +88,7 @@ namespace WindowsFormsApp1
                     ? TimeSpan.FromMilliseconds(elapsed.TotalMilliseconds / progress)
                     : TimeSpan.MaxValue;
                 var rem = tte - elapsed; // remaining
-                Console.WriteLine($"{progress,5:0.00} tp={elapsed} tt={tte} rem={rem}");
+                Console.WriteLine($"{progress*100,3}% passed={elapsed} total estimated={tte} remaining={rem}");
             }
         }
 
