@@ -52,24 +52,36 @@ namespace WindowsFormsApp1
                 Console.WriteLine($"Particles saved to {fileName}. To rerun use: --file={fileName}");
             }
 
-            var w = new WorkerArray();
-
-            var n = options.NumberOfFrames;
-            var i = n / 100;
-            var sw = Stopwatch.StartNew();
-            _frames = await w.SimulateAsync(n, particles, _size, new Progress<int>((a) =>
+            void Handler(int progress, int total, TimeSpan elapsed)
             {
-                if (a % i == 0)
+                if (progress % (total/100) == 0)
                 {
-                    var completed = (double)a/options.NumberOfFrames;
-                    var sofar = sw.Elapsed;
-                    var etatot = a != 0
-                        ? TimeSpan.FromMilliseconds(sw.ElapsedMilliseconds / completed)
+                    var completed = (double)progress / total;
+                    var sofar = elapsed;
+                    var etatot = progress != 0
+                        ? TimeSpan.FromMilliseconds(sofar.TotalMilliseconds / completed)
                         : TimeSpan.MaxValue;
                     var rem = etatot - sofar;
-                    Console.WriteLine($"{completed,4} tp={sofar} tt={etatot} rem={rem}");
+                    Console.WriteLine($"{completed,5:0.00} tp={sofar} tt={etatot} rem={rem}");
                 }
-            }));
+            }
+
+            var w = new WorkerArray();
+
+            _frames = await Task.Run(() =>
+            {
+                var sw = Stopwatch.StartNew();
+                var frames = new List<Particle[]>();
+                foreach (var (frame, i) in w
+                    .Simulate(options.NumberOfFrames, particles, _size)
+                    .Select((x, y) => (x, y)))
+                {
+                    Handler(i, options.NumberOfFrames, sw.Elapsed);
+                    frames.Add(frame);
+                }
+                sw.Stop();
+                return frames;
+            });
 
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
