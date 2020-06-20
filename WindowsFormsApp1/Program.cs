@@ -71,6 +71,7 @@ namespace WindowsFormsApp1
                 return list;
             });
 
+            Console.WriteLine("Printing frames");
             _framesAsGifs = frames
                 .AsParallel()
                 .Select(x => FrameToGifBytes(x, _size))
