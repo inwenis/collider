@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -18,6 +19,7 @@ namespace WindowsFormsApp1
         private static Form1 _mainForm;
         private static List<Particle[]> _frames;
         private static Size _size;
+        private static List<byte[]> _bitmaps;
 
         static async Task Main(string[] args)
         {
@@ -70,6 +72,14 @@ namespace WindowsFormsApp1
                 return frames;
             });
 
+            var list = _frames
+                .AsParallel()
+                .Select(x => FrameToGifBytes(x, _size))
+                .ToList();
+
+            _bitmaps = list;
+
+
             _mainForm = new Form1();
             _mainForm.TrackBar1.Minimum = 0;
             _mainForm.TrackBar1.Maximum = options.NumberOfFrames - 1;
@@ -97,43 +107,45 @@ namespace WindowsFormsApp1
         {
             var trackBar = (TrackBar) sender;
             var frame = _frames[trackBar.Value];
-            _mainForm.PictureBox1.Image = PrintFrame(frame, _size);
+            //_mainForm.PictureBox1.Image = PrintFrame(frame, _size);
             _mainForm.Label1.Text = trackBar.Value.ToString();
         }
 
         private static void PrintFrames()
         {
-            int frameNumber = 0;
-
-            foreach (var frame in _frames)
+            for (var i = 0; i < _frames.Count; i++)
             {
-                _mainForm.PictureBox1.Invoke((MethodInvoker)delegate {
+                _mainForm.PictureBox1.Invoke((MethodInvoker) delegate
+                {
                     // Running on the UI thread
-                    _mainForm.PictureBox1.Image = PrintFrame(frame, _size);
-                    _mainForm.Label1.Text = frameNumber.ToString();
-                    _mainForm.TrackBar1.Value = frameNumber;
+                    _mainForm.PictureBox1.Image = Image.FromStream(new MemoryStream(_bitmaps[i]));
+                    _mainForm.Label1.Text = i.ToString();
+                    _mainForm.TrackBar1.Value = i;
                 });
                 //Thread.Sleep(TimeSpan.FromMilliseconds(1));
-                frameNumber++;
             }
         }
 
-        private static Bitmap PrintFrame(Particle[] frame, Size size)
+        private static byte[] FrameToGifBytes(Particle[] particles, Size size)
         {
-            var bitmap = new Bitmap(size.Width+1, size.Height+1); // add 1 so there is space to print the border
-            var g = Graphics.FromImage(bitmap);
-
-            g.DrawLine(Pens.Black, 0,          0,           size.Width, 0);
-            g.DrawLine(Pens.Black, size.Width, 0,           size.Width, size.Height);
-            g.DrawLine(Pens.Black, size.Width, size.Height, 0,          size.Height);
-            g.DrawLine(Pens.Black, 0,          size.Height, 0,          0);
-
-            foreach (var p in frame)
+            // add 1 so there is space to print the border
+            using (var bitmap = new Bitmap(size.Width + 1, size.Height + 1))
+            using (var g = Graphics.FromImage(bitmap))
+            using (var memStream = new MemoryStream())
             {
-                g.FillEllipse(Brushes.Black, p.Pos.X - p.Sig, p.Pos.Y - p.Sig, 2 * p.Sig, 2 * p.Sig);
-            }
+                g.Clear(Color.White);
+                g.DrawLine(Pens.Black, 0,          0,           size.Width, 0);
+                g.DrawLine(Pens.Black, size.Width, 0,           size.Width, size.Height);
+                g.DrawLine(Pens.Black, size.Width, size.Height, 0,          size.Height);
+                g.DrawLine(Pens.Black, 0,          size.Height, 0,          0);
 
-            return bitmap;
+                foreach (var p in particles)
+                {
+                    g.FillEllipse(Brushes.Black, p.Pos.X - p.Sig, p.Pos.Y - p.Sig, 2 * p.Sig, 2 * p.Sig);
+                }
+                bitmap.Save(memStream, ImageFormat.Gif);
+                return memStream.ToArray();
+            }
         }
     }
 }
