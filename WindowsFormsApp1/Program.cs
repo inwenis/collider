@@ -23,8 +23,11 @@ namespace WindowsFormsApp1
         static async Task Main(string[] args)
         {
             var parserResult = Parser.Default.ParseArguments<Options>(args);
-            var options = ((Parsed<Options>) parserResult).Value;
+            await parserResult.WithParsedAsync(async x =>  { await RunApp(x); });
+        }
 
+        private static async Task RunApp(Options options)
+        {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -44,7 +47,7 @@ namespace WindowsFormsApp1
                 var size = options.Dimensions.ToArray();
                 _size = new Size(size[0], size[1]);
 
-                particles = new List<Particle> {new Particle {Pos = new Vector2(200, 200), Vel = Vector2.Zero, Sig = 20, Mass = 20}};
+                particles = new List<Particle>{new Particle {Pos = new Vector2(200, 200), Vel = Vector2.Zero, Sig = 20, Mass = 20}};
                 ParticlesGenerator.AddRandomParticles(particles, options.NumberOfParticles, options.Radius, 1, _size);
 
                 var serializedToCsv = CsvSerializer.ToCsvFixedWidth(options, particles);
@@ -67,6 +70,7 @@ namespace WindowsFormsApp1
                     HandleProgress(i, options.NumberOfFrames, sw.Elapsed);
                     list.Add(frame);
                 }
+
                 sw.Stop();
                 return list;
             });
@@ -82,7 +86,8 @@ namespace WindowsFormsApp1
             _mainForm.TrackBar1.Maximum = options.NumberOfFrames - 1;
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
-            Timer t = new Timer(obj => PrintFrames(), null, 500, -1); // wait 500ms before starting timer to let window be created
+            // wait 500ms before starting timer to let window be created
+            Timer t = new Timer(obj => PrintFrames(), null, 500, -1);
 
             Application.Run(_mainForm);
         }
