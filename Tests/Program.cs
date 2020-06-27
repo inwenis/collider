@@ -12,13 +12,14 @@ namespace Tests
     {
         static void Main(string[] args)
         {
+            var inputCsv = "input.csv";
             var nFrames = 6000;
             var size = new Size(700, 400);
 
             List<Particle> particles = null;
-            if (File.Exists("input.csv"))
+            if (File.Exists(inputCsv))
             {
-                CsvSerializer.ParseCsv(File.ReadAllLines("input.xml"), out var options, out var outParticles);
+                CsvSerializer.ParseCsv(File.ReadAllLines(inputCsv), out var options, out var outParticles);
                 particles = outParticles.ToList();
             }
             else
@@ -27,7 +28,7 @@ namespace Tests
                 ParticlesGenerator.AddRandomParticles(particles, 20, 5, 1, size);
                 var options = new Options(){NumberOfFrames = 20, Dimensions = new []{ 700, 400}};
                 var serializedToCsv = CsvSerializer.ToCsvFixedWidth(options, particles);
-                File.WriteAllText($"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.xml", serializedToCsv);
+                File.WriteAllText($"{DateTime.Now:yyyy-MM-dd--HH-mm-ss}.csv", serializedToCsv);
             }
 
             var wA = new Worker();
