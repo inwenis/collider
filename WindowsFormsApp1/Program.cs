@@ -67,10 +67,9 @@ namespace WindowsFormsApp1
                     .Take(options.NumberOfFrames)
                     .Select((frame, i) => (frame, i)))
                 {
-                    HandleProgress(i, options.NumberOfFrames, sw.Elapsed);
                     list.Add(frame);
+                    HandleProgress(i + 1, options.NumberOfFrames, sw.Elapsed);
                 }
-
                 sw.Stop();
                 return list;
             });
@@ -92,16 +91,14 @@ namespace WindowsFormsApp1
             Application.Run(_mainForm);
         }
 
-        private static void HandleProgress(int currentItem, int totalItems, TimeSpan elapsed)
+        private static void HandleProgress(int itemsDone, int itemsTotal, TimeSpan elapsed)
         {
-            if (currentItem % (totalItems / 100) == 0) // print 100 progress updates
+            if (itemsDone % (itemsTotal / 100) == 0) // print 100 progress updates
             {
-                var progress = (double)currentItem / totalItems;
-                var tte = currentItem != 0 // total time estimated
-                    ? TimeSpan.FromMilliseconds(elapsed.TotalMilliseconds / progress)
-                    : TimeSpan.MaxValue;
+                var progress = (double)itemsDone / itemsTotal;
+                var tte = TimeSpan.FromMilliseconds(elapsed.TotalMilliseconds / progress); // total time estimated
                 var rem = tte - elapsed; // remaining
-                Console.WriteLine($"{progress*100,3}% passed={elapsed} total estimated={tte} remaining={rem}");
+                Console.WriteLine($"{progress*100,3:.}% passed={elapsed} total estimated={tte} remaining={rem}");
             }
         }
 
