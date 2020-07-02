@@ -35,5 +35,12 @@ namespace WindowsFormsApp1
         {
             _stopwatch.Start();
         }
+
+        public static Progress StartNew(int total)
+        {
+            var progress = new Progress(total);
+            progress.Start();
+            return progress;
+        }
     }
 }
