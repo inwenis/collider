@@ -7,7 +7,7 @@ namespace WindowsFormsApp1
     {
         private int _done;
 
-        public void Report(int i, int total, TimeSpan elapsed)
+        public void Report(int total, TimeSpan elapsed)
         {
             Interlocked.Increment(ref _done);
 

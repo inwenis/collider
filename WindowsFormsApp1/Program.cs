@@ -69,7 +69,7 @@ namespace WindowsFormsApp1
                 .Select((frame, i) => (frame, i)))
             {
                 frames.Add(frame);
-                p.Report(i + 1, options.NumberOfFrames, sw.Elapsed);
+                p.Report(options.NumberOfFrames, sw.Elapsed);
             }
             sw.Stop();
 
@@ -82,7 +82,7 @@ namespace WindowsFormsApp1
                 .Select(x =>
                 {
                     var frameAsGidBytes = FrameToGifBytes(x, _size);
-                    p.Report(1, options.NumberOfFrames, sw.Elapsed);
+                    p.Report(options.NumberOfFrames, sw.Elapsed);
                     return frameAsGidBytes;
                 })
                 .ToList();
