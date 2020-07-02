@@ -59,29 +59,26 @@ namespace WindowsFormsApp1
 
             var w = new WorkerArray();
 
-            var p = new Progress();
-
             var frames = new List<Particle[]>();
-            var sw = Stopwatch.StartNew();
+            var p = new Progress();
+            p.Start();
             foreach (var frame in w
                 .Simulate(particles, _size)
                 .Take(options.NumberOfFrames))
             {
                 frames.Add(frame);
-                p.Report(options.NumberOfFrames, sw.Elapsed);
+                p.Report(options.NumberOfFrames);
             }
-            sw.Stop();
 
             p = new Progress();
-            
-            sw = Stopwatch.StartNew();
+            p.Start();
             Console.WriteLine("Printing frames");
             _framesAsGifs = frames
                 .AsParallel()
                 .Select(x =>
                 {
                     var frameAsGidBytes = FrameToGifBytes(x, _size);
-                    p.Report(options.NumberOfFrames, sw.Elapsed);
+                    p.Report(options.NumberOfFrames);
                     return frameAsGidBytes;
                 })
                 .ToList();
