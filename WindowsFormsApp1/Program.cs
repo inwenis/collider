@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -59,21 +60,25 @@ namespace WindowsFormsApp1
             var w = new WorkerArray();
 
             var frames = new List<Particle[]>();
-            var sw = Stopwatch.StartNew();
-            foreach (var (frame, i) in w
+            var p = Progress.StartNew(options.NumberOfFrames);
+            foreach (var frame in w
                 .Simulate(particles, _size)
-                .Take(options.NumberOfFrames)
-                .Select((frame, i) => (frame, i)))
+                .Take(options.NumberOfFrames))
             {
                 frames.Add(frame);
-                HandleProgress(i + 1, options.NumberOfFrames, sw.Elapsed);
+                p.Report();
             }
-            sw.Stop();
 
             Console.WriteLine("Printing frames");
+            p = Progress.StartNew(options.NumberOfFrames);
             _framesAsGifs = frames
                 .AsParallel()
-                .Select(x => FrameToGifBytes(x, _size))
+                .Select(x =>
+                {
+                    var frameAsGidBytes = FrameToGifBytes(x, _size);
+                    p.Report();
+                    return frameAsGidBytes;
+                })
                 .ToList();
 
             _mainForm = new Form1();
