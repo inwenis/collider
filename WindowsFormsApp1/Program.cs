@@ -59,7 +59,7 @@ namespace WindowsFormsApp1
 
             var w = new WorkerArray();
 
-            var p = new Progressor();
+            var p = new Progress();
 
             var frames = new List<Particle[]>();
             var sw = Stopwatch.StartNew();
@@ -72,7 +72,7 @@ namespace WindowsFormsApp1
             }
             sw.Stop();
 
-            p = new Progressor();
+            p = new Progress();
             
             sw = Stopwatch.StartNew();
             Console.WriteLine("Printing frames");

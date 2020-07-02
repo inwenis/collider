@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace WindowsFormsApp1
 {
-    internal class Progressor
+    internal class Progress
     {
         private int _done;
 
