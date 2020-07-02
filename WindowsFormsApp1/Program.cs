@@ -63,10 +63,9 @@ namespace WindowsFormsApp1
 
             var frames = new List<Particle[]>();
             var sw = Stopwatch.StartNew();
-            foreach (var (frame, i) in w
+            foreach (var frame in w
                 .Simulate(particles, _size)
-                .Take(options.NumberOfFrames)
-                .Select((frame, i) => (frame, i)))
+                .Take(options.NumberOfFrames))
             {
                 frames.Add(frame);
                 p.Report(options.NumberOfFrames, sw.Elapsed);
