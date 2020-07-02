@@ -58,21 +58,17 @@ namespace WindowsFormsApp1
 
             var w = new WorkerArray();
 
-            var frames = await Task.Run(() =>
+            var frames = new List<Particle[]>();
+            var sw = Stopwatch.StartNew();
+            foreach (var (frame, i) in w
+                .Simulate(particles, _size)
+                .Take(options.NumberOfFrames)
+                .Select((frame, i) => (frame, i)))
             {
-                var list = new List<Particle[]>();
-                var sw = Stopwatch.StartNew();
-                foreach (var (frame, i) in w
-                    .Simulate(particles, _size)
-                    .Take(options.NumberOfFrames)
-                    .Select((frame, i) => (frame, i)))
-                {
-                    list.Add(frame);
-                    HandleProgress(i + 1, options.NumberOfFrames, sw.Elapsed);
-                }
-                sw.Stop();
-                return list;
-            });
+                frames.Add(frame);
+                HandleProgress(i + 1, options.NumberOfFrames, sw.Elapsed);
+            }
+            sw.Stop();
 
             Console.WriteLine("Printing frames");
             _framesAsGifs = frames
