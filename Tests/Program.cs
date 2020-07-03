@@ -55,29 +55,41 @@ namespace Tests
         {
             var w = new WorkerArray();
             List<Particle[]> frames;
+            var originalConsoleOut = Console.Out;
 
-            // warmup x5
-            for (int i = 0; i < 5; i++)
+            using (var writer = new StringWriter())
             {
-                var particlesClone = particles.Select(x => x.Clone()).ToArray();
-                Console.WriteLine("----------------");
-                frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
-            }
+                Console.SetOut(writer);
 
-            // test x10
+                // warmup x5
+                for (int i = 0; i < 5; i++)
+                {
+                    var particlesClone = particles.Select(x => x.Clone()).ToArray();
+                    Console.WriteLine("----------------");
+                    frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
+                }
+
+            }
+            Console.SetOut(originalConsoleOut);
+
             var results = new List<TimeSpan>();
-            for (int i = 0; i < 10; i++)
+            using (var writer = new StringWriter())
             {
-                var particlesClone = particles.Select(x => x.Clone()).ToArray();
-                Console.WriteLine("----------------");
-                var sw = Stopwatch.StartNew();
-                frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
-                results.Add(sw.Elapsed);
+                Console.SetOut(writer);
+                // test x10
+                for (int i = 0; i < 10; i++)
+                {
+                    var particlesClone = particles.Select(x => x.Clone()).ToArray();
+                    Console.WriteLine("----------------");
+                    var sw = Stopwatch.StartNew();
+                    frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
+                    results.Add(sw.Elapsed);
+                }
             }
+            Console.SetOut(originalConsoleOut);
 
             var average = results.Average(x => x.TotalMilliseconds);
             Console.WriteLine(TimeSpan.FromMilliseconds(average));
-
         }
 
         private static void CompareWorkers(List<Particle> particles, int nFrames, Size size)
