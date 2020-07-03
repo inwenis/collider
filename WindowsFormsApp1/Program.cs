@@ -19,13 +19,13 @@ namespace WindowsFormsApp1
         private static Size _size;
         private static List<byte[]> _framesAsGifs;
 
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             var parserResult = Parser.Default.ParseArguments<Options>(args);
-            await parserResult.WithParsedAsync(async x =>  { await RunApp(x); });
+            parserResult.WithParsed(RunApp);
         }
 
-        private static async Task RunApp(Options options)
+        private static void RunApp(Options options)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
