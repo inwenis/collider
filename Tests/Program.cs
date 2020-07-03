@@ -45,7 +45,7 @@ namespace Tests
             // warmup x5
             for (int i = 0; i < 5; i++)
             {
-                var particlesClone = particles.Select(x => x.Clone());
+                var particlesClone = particles.Select(x => x.Clone()).ToArray();
                 Console.WriteLine("----------------");
                 frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
             }
@@ -54,7 +54,7 @@ namespace Tests
             var results = new List<TimeSpan>();
             for (int i = 0; i < 10; i++)
             {
-                var particlesClone = particles.Select(x => x.Clone());
+                var particlesClone = particles.Select(x => x.Clone()).ToArray();
                 Console.WriteLine("----------------");
                 var sw = Stopwatch.StartNew();
                 frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
