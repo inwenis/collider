@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -90,17 +88,6 @@ namespace WindowsFormsApp1
             Timer t = new Timer(obj => PrintFrames(), null, 500, -1);
 
             Application.Run(_mainForm);
-        }
-
-        private static void HandleProgress(int itemsDone, int itemsTotal, TimeSpan elapsed)
-        {
-            if (itemsDone % (itemsTotal / 100) == 0) // print 100 progress updates
-            {
-                var progress = (double)itemsDone / itemsTotal;
-                var tte = TimeSpan.FromMilliseconds(elapsed.TotalMilliseconds / progress); // total time estimated
-                var rem = tte - elapsed; // remaining
-                Console.WriteLine($"{progress*100,3:.}% passed={elapsed} total estimated={tte} remaining={rem}");
-            }
         }
 
         private static void TrackBar1_Scroll(object sender, EventArgs e)
