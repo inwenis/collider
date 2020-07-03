@@ -15,7 +15,7 @@ namespace Tests
         {
             var inputCsv = "input.csv";
             var nFrames = 6000;
-            int nPartic = 200;
+            int nPartic = 400;
             var size = new Size(700, 400);
 
             List<Particle> particles = null;
@@ -45,15 +45,19 @@ namespace Tests
             // warmup x5
             for (int i = 0; i < 5; i++)
             {
-                frames = w.Simulate(particles, size).Take(nFrames).ToList();
+                var particlesClone = particles.Select(x => x.Clone());
+                Console.WriteLine("----------------");
+                frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
             }
 
             // test x10
             var results = new List<TimeSpan>();
             for (int i = 0; i < 10; i++)
             {
+                var particlesClone = particles.Select(x => x.Clone());
+                Console.WriteLine("----------------");
                 var sw = Stopwatch.StartNew();
-                frames = w.Simulate(particles, size).Take(nFrames).ToList();
+                frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
                 results.Add(sw.Elapsed);
             }
 
