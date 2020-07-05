@@ -70,7 +70,7 @@ namespace Tests
             WithRedirectedConsoleOut(() =>
             {
                 // warmup x5
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 0; i++)
                 {
                     var particlesClone = particles.Select(x => x.Clone()).ToArray();
                     Console.WriteLine("----------------");
@@ -82,7 +82,7 @@ namespace Tests
             WithRedirectedConsoleOut(() =>
             {
                 // test x10
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     var particlesClone = particles.Select(x => x.Clone()).ToArray();
                     Console.WriteLine("----------------");
