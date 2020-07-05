@@ -69,7 +69,7 @@ namespace Tests
 
             WithRedirectedConsoleOut(() =>
             {
-                // warmup x5
+                // warmups
                 for (int i = 0; i < 0; i++)
                 {
                     var particlesClone = particles.Select(x => x.Clone()).ToArray();
@@ -81,7 +81,7 @@ namespace Tests
             var results = new List<TimeSpan>();
             WithRedirectedConsoleOut(() =>
             {
-                // test x10
+                // actual measurements
                 for (int i = 0; i < 1; i++)
                 {
                     var particlesClone = particles.Select(x => x.Clone()).ToArray();
