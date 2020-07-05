@@ -53,14 +53,22 @@ namespace Tests
 
         private static void MeasureTime(List<Particle> particles, int nFrames, Size size)
         {
+            void WithRedirectedConsoleOut(Action action)
+            {
+                var originalConsoleOut = Console.Out;
+                using (var writer = new StringWriter())
+                {
+                    Console.SetOut(writer);
+                    action();
+                }
+                Console.SetOut(originalConsoleOut);
+            }
+
             var w = new WorkerArray();
             List<Particle[]> frames;
-            var originalConsoleOut = Console.Out;
 
-            using (var writer = new StringWriter())
+            WithRedirectedConsoleOut(() =>
             {
-                Console.SetOut(writer);
-
                 // warmup x5
                 for (int i = 0; i < 5; i++)
                 {
@@ -68,14 +76,11 @@ namespace Tests
                     Console.WriteLine("----------------");
                     frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
                 }
-
-            }
-            Console.SetOut(originalConsoleOut);
+            });
 
             var results = new List<TimeSpan>();
-            using (var writer = new StringWriter())
+            WithRedirectedConsoleOut(() =>
             {
-                Console.SetOut(writer);
                 // test x10
                 for (int i = 0; i < 10; i++)
                 {
@@ -85,8 +90,7 @@ namespace Tests
                     frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
                     results.Add(sw.Elapsed);
                 }
-            }
-            Console.SetOut(originalConsoleOut);
+            });
 
             var average = results.Average(x => x.TotalMilliseconds);
             Console.WriteLine(TimeSpan.FromMilliseconds(average));
