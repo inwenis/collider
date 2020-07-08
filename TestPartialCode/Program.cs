@@ -20,10 +20,13 @@ namespace TestPartialCode
 
             WorkerArray.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
-            MeasureTime(particlesArr, ppCollisions);
+            var measureTime1 = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Parallel);
+            Console.WriteLine($"Parallel {measureTime1}");
+            var measureTime2 = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Seq);
+            Console.WriteLine($"Parallel {measureTime2}");
         }
 
-        private static void MeasureTime(Particle[] particlesArr, float?[][] ppCollisions)
+        private static TimeSpan MeasureTime(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun)
         {
             var results = new List<TimeSpan>();
             var dump = new List<Collision>();
@@ -32,7 +35,7 @@ namespace TestPartialCode
             for (int i = 0; i < 10; i++)
             {
                 //Console.WriteLine("----------------");
-                var result = FindClosestPpCollision(particlesArr, ppCollisions);
+                var result = fun(particlesArr, ppCollisions);
                 dump.Add(result);
                 //Console.WriteLine(result);
             }
@@ -44,7 +47,7 @@ namespace TestPartialCode
                 var sw = new Stopwatch();
 
                 sw.Start();
-                var result = FindClosestPpCollision(particlesArr, ppCollisions);
+                var result = fun(particlesArr, ppCollisions);
                 sw.Stop();
 
                 dump.Add(result);
@@ -53,11 +56,10 @@ namespace TestPartialCode
             }
 
             var average = results.Average(x => x.TotalMilliseconds);
-            Console.WriteLine(TimeSpan.FromMilliseconds(average));
+            return TimeSpan.FromMilliseconds(average);
         }
 
-
-        private static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions)
+        private static Collision FindClosestPpCollision_Parallel(Particle[] particles, float?[][] ppCollisions)
         {
             // PP collision - particle - particle collision
             var minI = 0;
@@ -107,6 +109,32 @@ namespace TestPartialCode
             double? accumulateItem3 = accumulate.Item3;
             return accumulate.Item3.HasValue
                 ? new Collision(particles[accumulate.Item1], accumulate.Item1, particles[accumulate.Item2], accumulate.Item2, (float)accumulateItem3.Value)
+                : null;
+        }
+
+        private static Collision FindClosestPpCollision_Seq(Particle[] particles, float?[][] ppCollisions)
+        {
+            // PP collision - particle - particle collision
+            var minI = 0;
+            var minJ = 0;
+            var minDt = float.MaxValue;
+            var collisionExists = false;
+            for (var i = 0; i < particles.Length; i++)
+            {
+                for (var j = i + 1; j < particles.Length; j++)
+                {
+                    if (ppCollisions[i][j].HasValue && ppCollisions[i][j] < minDt)
+                    {
+                        minI = i;
+                        minJ = j;
+                        minDt = ppCollisions[i][j].Value;
+                        collisionExists = true;
+                    }
+                }
+            }
+
+            return collisionExists
+                ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt)
                 : null;
         }
 
