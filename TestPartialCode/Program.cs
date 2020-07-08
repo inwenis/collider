@@ -26,27 +26,30 @@ namespace TestPartialCode
         private static void MeasureTime(Particle[] particlesArr, float?[][] ppCollisions)
         {
             var results = new List<TimeSpan>();
+            var dump = new List<Collision>();
 
             // warmups
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < 10; i++)
             {
-                Console.WriteLine("----------------");
+                //Console.WriteLine("----------------");
                 var result = FindClosestPpCollision(particlesArr, ppCollisions);
-                Console.WriteLine(result);
+                dump.Add(result);
+                //Console.WriteLine(result);
             }
 
             // actual measurements
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 100; i++)
             {
-                Console.WriteLine("----------------");
+                //Console.WriteLine("----------------");
                 var sw = new Stopwatch();
 
                 sw.Start();
                 var result = FindClosestPpCollision(particlesArr, ppCollisions);
                 sw.Stop();
 
+                dump.Add(result);
                 results.Add(sw.Elapsed);
-                Console.WriteLine(result);
+                //Console.WriteLine(result);
             }
 
             var average = results.Average(x => x.TotalMilliseconds);
