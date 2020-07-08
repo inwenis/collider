@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApp1
 {
-    class Array2D
+    public class Array2D
     {
         public static T[][] Create<T>(int dim1, int dim2)
         {

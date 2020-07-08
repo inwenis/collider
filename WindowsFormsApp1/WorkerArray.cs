@@ -63,7 +63,7 @@ namespace WindowsFormsApp1
             Debug.WriteLine($"Computed: {frames.Count} frames");
         }
 
-        private static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions, float t)
+        public static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions, float t)
         {
             for (var i = 0; i < particles.Length; i++)
             {
