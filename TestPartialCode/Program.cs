@@ -13,17 +13,30 @@ namespace TestPartialCode
     {
         static void Main(string[] args)
         {
-            var lines = File.ReadAllLines("input.csv");
-            CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
-            var particlesArr = outParticles.ToArray();
-            var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
+            var files = new []
+            {
+                @"c:\git\collider\f1000_n1000_800x800.csv",
+                @"c:\git\collider\default_f10000_n800.csv",
+                @"c:\git\collider\default_f10000_n400.csv",
+                @"c:\git\collider\default_f10000.csv",
+                @"c:\git\collider\default.csv",
+                @"input.csv",
+            };
 
-            WorkerArray.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
-            var measureTime1 = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Parallel);
-            Console.WriteLine($"Parallel {measureTime1}");
-            var measureTime2 = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Seq);
-            Console.WriteLine($"Parallel {measureTime2}");
+            Console.WriteLine($"{"file",40} {"seq",15} {"par",15}");
+            foreach (var file in files)
+            {
+                var lines = File.ReadAllLines(file);
+                CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
+                var particlesArr = outParticles.ToArray();
+                var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
+                WorkerArray.SetAllPpCollisions(particlesArr, ppCollisions, 0);
+
+                var ts = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Seq);
+                var tp = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Parallel);
+                Console.WriteLine($"{file,-40} {ts,15:G} {tp,15:G}");
+            }
         }
 
         private static TimeSpan MeasureTime(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun)
