@@ -23,7 +23,6 @@ namespace TestPartialCode
                 @"c:\git\collider\input_big.csv",
             };
 
-
             Console.WriteLine($"{"file",40} {"seq",15} {"par",15}");
             foreach (var file in files)
             {
