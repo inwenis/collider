@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WindowsFormsApp1
+namespace Collider
 {
     public class Frame
     {

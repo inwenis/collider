@@ -6,7 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace WindowsFormsApp1
+namespace Collider
 {
     public class WorkerArray_FindClosestPpCollisionParallel : IWorker
     {

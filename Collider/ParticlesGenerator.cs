@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Numerics;
 
-namespace WindowsFormsApp1
+namespace Collider
 {
     public static class ParticlesGenerator
     {

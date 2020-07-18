@@ -1,4 +1,4 @@
-﻿namespace WindowsFormsApp1
+﻿namespace Collider
 {
     public class Array2D
     {

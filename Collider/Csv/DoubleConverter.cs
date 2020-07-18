@@ -3,7 +3,7 @@
 using System;
 using System.Globalization;
 
-namespace WindowsFormsApp1.Csv
+namespace Collider.Csv
 {
     /// <summary>
     /// A class to allow the conversion of doubles to string representations of

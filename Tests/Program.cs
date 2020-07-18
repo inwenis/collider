@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using WindowsFormsApp1;
-using WindowsFormsApp1.Csv;
+using Collider;
+using Collider.Csv;
 
 namespace Tests
 {

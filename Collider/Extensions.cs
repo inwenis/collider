@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 
-namespace WindowsFormsApp1
+namespace Collider
 {
     public static class Extensions
     {

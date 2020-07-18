@@ -1,4 +1,4 @@
-﻿namespace WindowsFormsApp1
+﻿namespace Collider
 {
     partial class Form1
     {

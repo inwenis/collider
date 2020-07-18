@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 
-namespace WindowsFormsApp1
+namespace Collider
 {
     internal class Progress
     {

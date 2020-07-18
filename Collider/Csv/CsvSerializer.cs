@@ -3,7 +3,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-namespace WindowsFormsApp1.Csv
+namespace Collider.Csv
 {
     public class CsvSerializer
     {

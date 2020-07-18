@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Linq;
 using CommandLine;
 
-namespace WindowsFormsApp1
+namespace Collider
 {
     public class Options
     {

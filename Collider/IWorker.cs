@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 
-namespace WindowsFormsApp1
+namespace Collider
 {
     public interface IWorker
     {

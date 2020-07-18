@@ -4,13 +4,13 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 using System.Numerics;
-using WindowsFormsApp1.Csv;
+using System.Windows.Forms;
+using Collider.Csv;
 using CommandLine;
 using Timer = System.Threading.Timer;
 
-namespace WindowsFormsApp1
+namespace Collider
 {
     static class Program
     {
