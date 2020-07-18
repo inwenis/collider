@@ -67,7 +67,7 @@ namespace TestPartialCode
             }
 
             // actual measurements
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 //Console.WriteLine("----------------");
                 var sw = new Stopwatch();
@@ -81,7 +81,7 @@ namespace TestPartialCode
                 //Console.WriteLine(result);
             }
 
-            var average = results.Average(x => x.TotalMilliseconds);
+            var average = results.Sum(x => x.TotalMilliseconds);
             return (TimeSpan.FromMilliseconds(average), dump);
         }
 
