@@ -54,7 +54,7 @@ namespace WindowsFormsApp1
                 Console.WriteLine($"Particles saved to {fileName}. To rerun use: --file={fileName}");
             }
 
-            var w = new WorkerArray();
+            var w = new WorkerArray_FindClosestPpCollisionSequential();
 
             var frames = new List<Particle[]>();
             var p = Progress.StartNew(options.NumberOfFrames);

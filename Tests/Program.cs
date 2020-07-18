@@ -64,7 +64,7 @@ namespace Tests
                 Console.SetOut(originalConsoleOut);
             }
 
-            var w = new WorkerArray();
+            var w = new WorkerArray_FindClosestPpCollisionSequential();
             List<Particle[]> frames;
 
             WithRedirectedConsoleOut(() =>
@@ -99,7 +99,7 @@ namespace Tests
         private static void CompareWorkers(List<Particle> particles, int nFrames, Size size)
         {
             var wA = new Worker();
-            var wB = new WorkerArray();
+            var wB = new WorkerArray_FindClosestPpCollisionSequential();
 
             var particlesA = particles.Select(x => x.Clone());
             var particlesB = particles.Select(x => x.Clone());
