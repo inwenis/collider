@@ -189,7 +189,7 @@ namespace Collider
             });
 
             double curMin = double.MaxValue;
-            (int, int, double?) x;
+            (int, int, double?) x = (0, 0, null);
             for (int i = 0; i < temp.Length; i++)
             {
                 if (temp[i].Item3 < curMin)
@@ -199,12 +199,9 @@ namespace Collider
                 }
             }
 
-            if (curMin != Double.MaxValue)
+            if (x.Item3 != null)
             {
-                x.Item1 = default;
-                x.Item2 = default;
-                new Collision(particles[x.Item1], x.Item1, particles[x.Item2],
-                    x.Item2, (float) curMin);
+                return new Collision(particles[x.Item1], x.Item1, particles[x.Item2], x.Item2, (float) curMin);
             }
             return null;
         }
