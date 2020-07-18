@@ -15,20 +15,21 @@ namespace Tests
         {
             var files = new []
             {
-                "input_f1000_s1000x1000_n10.csv",
-                "input_f1000_s1000x1000_n20.csv",
-                "input_f1000_s1000x1000_n40.csv",
-                "input_f1000_s1000x1000_n80.csv",
-                "input_f1000_s1000x1000_n160.csv",
-                "input_f1000_s1000x1000_n320.csv",
-                "input_f1000_s1000x1000_n640.csv",
+                "input_f1000_s1000x1000_n0010.csv",
+                "input_f1000_s1000x1000_n0020.csv",
+                "input_f1000_s1000x1000_n0040.csv",
+                "input_f1000_s1000x1000_n0080.csv",
+                "input_f1000_s1000x1000_n0160.csv",
+                "input_f1000_s1000x1000_n0320.csv",
+                "input_f1000_s1000x1000_n0640.csv",
                 "input_f1000_s1000x1000_n1280.csv",
                 "input_f1000_s1000x1000_n2560.csv",
                 "input_f1000_s1000x1000_n5120.csv",
             };
 
+            Console.WriteLine($"{"file",40} {"seq",15} {"par",15} {"par2",15}");
+
             Console.WriteLine("FindClosestPpCollision measurement");
-            Console.WriteLine($"{"file",40} {"seq",15} {"par",15}");
             foreach (var file in files)
             {
                 var lines = File.ReadAllLines(file);
@@ -39,15 +40,16 @@ namespace Tests
 
                 var ts = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision);
                 var tp = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision);
+                var tp2 = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel2.FindClosestPpCollision);
 
                 var tsAvg = TimeSpan.FromMilliseconds(ts.Average(x => x.TotalMilliseconds));
                 var tpAvg = TimeSpan.FromMilliseconds(tp.Average(x => x.TotalMilliseconds));
+                var tp2Avg = TimeSpan.FromMilliseconds(tp2.Average(x => x.TotalMilliseconds));
 
-                Console.WriteLine($"{file,-40} {tsAvg,15:G} {tpAvg,15:G}");
+                Console.WriteLine($"{file,-40} {tsAvg,15:G} {tpAvg,15:G} {tp2Avg,15:G}");
             }
 
             Console.WriteLine("Complete app measurement");
-            Console.WriteLine($"{"file",40} {"seq",15} {"par",15}");
             foreach (var file in files)
             {
                 var lines = File.ReadAllLines(file);
@@ -56,11 +58,13 @@ namespace Tests
 
                 var ts = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 0, 1);
                 var tp = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 0, 1);
+                var tp2 = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel2(), 0, 1);
 
                 var tsAvg = TimeSpan.FromMilliseconds(ts.Average(x => x.TotalMilliseconds));
                 var tpAvg = TimeSpan.FromMilliseconds(tp.Average(x => x.TotalMilliseconds));
+                var tp2Avg = TimeSpan.FromMilliseconds(tp2.Average(x => x.TotalMilliseconds));
 
-                Console.WriteLine($"{file,-40} {tsAvg,15:G} {tpAvg,15:G}");
+                Console.WriteLine($"{file,-40} {tsAvg,15:G} {tpAvg,15:G} {tp2Avg,15:G}");
             }
 
             Console.WriteLine("Comparing workers");
@@ -70,8 +74,19 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                CompareWorkers(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), () => new WorkerArray_FindClosestPpCollisionParallel());
+                CompareWorkers(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), () => new WorkerArray_FindClosestPpCollisionParallel2());
             }
+        }
+
+        static void WithRedirectedConsoleOut(Action action)
+        {
+            var originalConsoleOut = Console.Out;
+            using (var writer = new StringWriter())
+            {
+                Console.SetOut(writer);
+                action();
+            }
+            Console.SetOut(originalConsoleOut);
         }
 
         private static List<TimeSpan> MeasureFunction(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun, int nWarmups = 10, int nTests = 1000)
@@ -102,17 +117,6 @@ namespace Tests
 
         private static List<TimeSpan> MeasureApp(IReadOnlyCollection<Particle> particles, int nFrames, Size size, Func<IWorker> sutFactory, int nWarmups = 2, int nTests = 4)
         {
-            void WithRedirectedConsoleOut(Action action)
-            {
-                var originalConsoleOut = Console.Out;
-                using (var writer = new StringWriter())
-                {
-                    Console.SetOut(writer);
-                    action();
-                }
-                Console.SetOut(originalConsoleOut);
-            }
-
             var sut = sutFactory();
             List<Particle[]> dump;
 
@@ -152,8 +156,14 @@ namespace Tests
             var particlesA = particles.Select(x => x.Clone());
             var particlesB = particles.Select(x => x.Clone());
 
-            var framesA = wA.Simulate(particlesA, size).Take(nFrames).ToList();
-            var framesB = wB.Simulate(particlesB, size).Take(nFrames).ToList();
+            List<Particle[]> framesA = null;
+            List<Particle[]> framesB = null;
+
+            WithRedirectedConsoleOut(() =>
+            {
+                framesA = wA.Simulate(particlesA, size).Take(nFrames).ToList();
+                framesB = wB.Simulate(particlesB, size).Take(nFrames).ToList();
+            });
 
             var (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
 

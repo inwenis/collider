@@ -70,11 +70,20 @@
     <None Include="input_f1000_s1000x1000_n0640.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="input_f1000_s1000x1000_n1280.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n2560.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n5120.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Collider\Collider.csproj">
-      <Project>{BFD4042F-32A2-4C27-A750-09D4E9C28D76}</Project>
-      <Name>WindowsFormsApp1</Name>
+      <Project>{bfd4042f-32a2-4c27-a750-09d4e9c28d76}</Project>
+      <Name>Collider</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
