@@ -49,39 +49,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="input_f1000_s1000x1000_n10.csv">
+    <None Include="input_f1000_s1000x1000_n0010.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="input_f1000_s1000x1000_n1280.csv">
+    <None Include="input_f1000_s1000x1000_n0020.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="input_f1000_s1000x1000_n160.csv">
+    <None Include="input_f1000_s1000x1000_n0040.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="input_f1000_s1000x1000_n20.csv">
+    <None Include="input_f1000_s1000x1000_n0080.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="input_f1000_s1000x1000_n2560.csv">
+    <None Include="input_f1000_s1000x1000_n0160.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="input_f1000_s1000x1000_n320.csv">
+    <None Include="input_f1000_s1000x1000_n0320.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="input_f1000_s1000x1000_n40.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="input_f1000_s1000x1000_n5120.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="input_f1000_s1000x1000_n640.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="input_f1000_s1000x1000_n80.csv">
+    <None Include="input_f1000_s1000x1000_n0640.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WindowsFormsApp1\WindowsFormsApp1.csproj">
+    <ProjectReference Include="..\Collider\Collider.csproj">
       <Project>{BFD4042F-32A2-4C27-A750-09D4E9C28D76}</Project>
       <Name>WindowsFormsApp1</Name>
     </ProjectReference>
