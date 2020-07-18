@@ -48,10 +48,10 @@ namespace Tests
             }
 
             //CompareWorkers(particles, nFrames, size);
-            MeasureTime(particles, options.NumberOfFrames, size);
+            MeasureTime(particles, options.NumberOfFrames, size, 0, 1);
         }
 
-        private static void MeasureTime(List<Particle> particles, int nFrames, Size size)
+        private static List<TimeSpan> MeasureTime(List<Particle> particles, int nFrames, Size size, int nWarmups, int nTests)
         {
             void WithRedirectedConsoleOut(Action action)
             {
@@ -65,15 +65,15 @@ namespace Tests
             }
 
             var w = new WorkerArray_FindClosestPpCollisionSequential();
-            List<Particle[]> frames;
+            List<Particle[]> dump;
 
             WithRedirectedConsoleOut(() =>
             {
                 // warmups
-                for (int i = 0; i < 0; i++)
+                for (int i = 0; i < nWarmups; i++)
                 {
                     var particlesClone = particles.Select(x => x.Clone()).ToArray();
-                    frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
+                    dump = w.Simulate(particlesClone, size).Take(nFrames).ToList();
                 }
             });
 
@@ -81,17 +81,18 @@ namespace Tests
             WithRedirectedConsoleOut(() =>
             {
                 // actual measurements
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < nTests; i++)
                 {
                     var particlesClone = particles.Select(x => x.Clone()).ToArray();
-                    var sw = Stopwatch.StartNew();
-                    frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
+                    var sw = new Stopwatch();
+                    sw.Start();
+                    dump = w.Simulate(particlesClone, size).Take(nFrames).ToList();
+                    sw.Stop();
                     results.Add(sw.Elapsed);
                 }
             });
 
-            var average = results.Average(x => x.TotalMilliseconds);
-            Console.WriteLine(TimeSpan.FromMilliseconds(average));
+            return results;
         }
 
         private static void CompareWorkers(List<Particle> particles, int nFrames, Size size)
