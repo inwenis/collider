@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApp1", "WindowsFormsApp1\WindowsFormsApp1.csproj", "{BFD4042F-32A2-4C27-A750-09D4E9C28D76}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collider", "Collider\Collider.csproj", "{BFD4042F-32A2-4C27-A750-09D4E9C28D76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "TestPartialCode\Tests.csproj", "{3BB0B609-D17E-4317-A4AF-78D4F60529BD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{3BB0B609-D17E-4317-A4AF-78D4F60529BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
