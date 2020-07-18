@@ -62,6 +62,16 @@ namespace TestPartialCode
 
                 Console.WriteLine($"{file,-40} {tsAvg,15:G} {tpAvg,15:G}");
             }
+
+            Console.WriteLine("Comparing workers");
+            foreach (var file in files)
+            {
+                var lines = File.ReadAllLines(file);
+                CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
+                var particlesArr = outParticles.ToArray();
+
+                CompareWorkers(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), () => new WorkerArray_FindClosestPpCollisionParallel());
+            }
         }
 
         private static List<TimeSpan> MeasureFunction(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun, int nWarmups = 10, int nTests = 1000)
@@ -133,5 +143,34 @@ namespace TestPartialCode
 
             return results;
         }
+
+        private static void CompareWorkers(IReadOnlyCollection<Particle> particles, int nFrames, Size size, Func<IWorker> sutFactoryA, Func<IWorker> sutFactoryB)
+        {
+            var wA = sutFactoryA();
+            var wB = sutFactoryB();
+
+            var particlesA = particles.Select(x => x.Clone());
+            var particlesB = particles.Select(x => x.Clone());
+
+            var framesA = wA.Simulate(particlesA, size).Take(nFrames).ToList();
+            var framesB = wB.Simulate(particlesB, size).Take(nFrames).ToList();
+
+            var (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
+
+            if (framesWithDifferences.Any())
+            {
+                Console.WriteLine($"First diff in frame {framesWithDifferences.First()}");
+            }
+            else
+            {
+                Console.WriteLine("No diff");
+            }
+
+            foreach (var framesComparison in framesComparisons.OrderBy(x => x.Key).Select(x => x.Value))
+            {
+                Console.WriteLine($"{framesComparison.TotalDiff}");
+            }
+        }
+
     }
 }
