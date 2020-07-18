@@ -20,7 +20,7 @@ namespace TestPartialCode
                 @"c:\git\collider\default_f10000_n400.csv",
                 @"c:\git\collider\default_f10000.csv",
                 @"c:\git\collider\default.csv",
-                @"input_big.csv",
+                @"c:\git\collider\input_big.csv",
             };
 
 
