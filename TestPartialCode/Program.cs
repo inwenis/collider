@@ -15,12 +15,16 @@ namespace TestPartialCode
         {
             var files = new []
             {
-                @"c:\git\collider\f1000_n1000_800x800.csv",
-                //@"c:\git\collider\default_f10000_n800.csv",
-                @"c:\git\collider\default_f10000_n400.csv",
-                @"c:\git\collider\default_f10000.csv",
-                @"c:\git\collider\default.csv",
-                @"c:\git\collider\input_big.csv",
+                "input_f1000_s1000x1000_n10.csv",
+                "input_f1000_s1000x1000_n20.csv",
+                "input_f1000_s1000x1000_n40.csv",
+                "input_f1000_s1000x1000_n80.csv",
+                "input_f1000_s1000x1000_n160.csv",
+                "input_f1000_s1000x1000_n320.csv",
+                "input_f1000_s1000x1000_n640.csv",
+                "input_f1000_s1000x1000_n1280.csv",
+                "input_f1000_s1000x1000_n2560.csv",
+                "input_f1000_s1000x1000_n5120.csv",
             };
 
             Console.WriteLine("FindClosestPpCollision measurement");
@@ -50,8 +54,8 @@ namespace TestPartialCode
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                var ts = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 0);
-                var tp = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 0);
+                var ts = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 0, 1);
+                var tp = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 0, 1);
 
                 var tsAvg = TimeSpan.FromMilliseconds(ts.Average(x => x.TotalMilliseconds));
                 var tpAvg = TimeSpan.FromMilliseconds(tp.Average(x => x.TotalMilliseconds));
