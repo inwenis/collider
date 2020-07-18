@@ -4,10 +4,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace WindowsFormsApp1
 {
-    public class WorkerArray
+    public class WorkerArray_FindClosestPpCollisionParallel : IWorker
     {
         public IEnumerable<Particle[]> Simulate(IEnumerable<Particle> particles, Size size)
         {
@@ -62,7 +63,7 @@ namespace WindowsFormsApp1
             Debug.WriteLine($"Computed: {frames.Count} frames");
         }
 
-        private static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions, float t)
+        public static void SetAllPpCollisions(Particle[] particles, float?[][] ppCollisions, float t)
         {
             for (var i = 0; i < particles.Length; i++)
             {
@@ -163,29 +164,56 @@ namespace WindowsFormsApp1
             return null;
         }
 
-        private static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions)
+        public static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions)
         {
             // PP collision - particle - particle collision
             var minI = 0;
             var minJ = 0;
-            var minDt = float.MaxValue;
             var collisionExists = false;
-            for (var i = 0; i < particles.Length; i++)
+
+            var temp = new (int, int, double?)[particles.Length];
+
+            Parallel.For(0, particles.Length, i =>
             {
+                var minDt = float.MaxValue;
                 for (var j = i + 1; j < particles.Length; j++)
                 {
                     if (ppCollisions[i][j].HasValue && ppCollisions[i][j] < minDt)
                     {
-                        minI = i;
-                        minJ = j;
-                        minDt = ppCollisions[i][j].Value;
-                        collisionExists = true;
+                        temp[i].Item1 = i;
+                        temp[i].Item2 = j;
+                        temp[i].Item3 = minDt = ppCollisions[i][j].Value;
                     }
                 }
-            }
+            });
 
-            return collisionExists
-                ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt)
+            var accumulate = temp.Aggregate((0, 0, (double?)null), (acc, y) =>
+            {
+                if (!acc.Item3.HasValue && !y.Item3.HasValue)
+                {
+                    return acc;
+                }
+
+                if (!acc.Item3.HasValue)
+                {
+                    return y;
+                }
+
+                if (!y.Item3.HasValue)
+                {
+                    return acc;
+                }
+
+                if (y.Item3 < acc.Item3)
+                {
+                    return y;
+                }
+                return acc;
+            });
+
+            double? accumulateItem3 = accumulate.Item3;
+            return accumulate.Item3.HasValue
+                ? new Collision(particles[accumulate.Item1], accumulate.Item1, particles[accumulate.Item2], accumulate.Item2, (float)accumulateItem3.Value)
                 : null;
         }
 

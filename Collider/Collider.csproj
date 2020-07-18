@@ -68,6 +68,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Frame.cs" />
+    <Compile Include="IWorker.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="ParticlesGenerator.cs" />
     <Compile Include="Particle.cs" />
@@ -75,7 +76,8 @@
     <Compile Include="Progress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools.cs" />
-    <Compile Include="WorkerArray.cs" />
+    <Compile Include="WorkerArray_FindClosestPpCollisionParallel.cs" />
+    <Compile Include="WorkerArray_FindClosestPpCollisionSequential.cs" />
     <Compile Include="Worker.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

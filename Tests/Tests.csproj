@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E0BA6451-7CEA-4E4A-B8F7-A5B8FA992C41}</ProjectGuid>
+    <ProjectGuid>{3BB0B609-D17E-4317-A4AF-78D4F60529BD}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Tests</RootNamespace>
     <AssemblyName>Tests</AssemblyName>
@@ -49,9 +49,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="input_f1000_s1000x1000_n0010.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n0020.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n0040.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n0080.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n0160.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n0320.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n0640.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WindowsFormsApp1\WindowsFormsApp1.csproj">
+    <ProjectReference Include="..\Collider\Collider.csproj">
       <Project>{BFD4042F-32A2-4C27-A750-09D4E9C28D76}</Project>
       <Name>WindowsFormsApp1</Name>
     </ProjectReference>

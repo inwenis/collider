@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using CommandLine;
 
 namespace WindowsFormsApp1
@@ -19,6 +21,15 @@ namespace WindowsFormsApp1
 
         [Option('s', "size", Separator = ',', Min = 2, Max = 2, Required = false, Default = new []{ 400, 400})]
         public IEnumerable<int> Dimensions { get; set; }
+
+        public Size Size
+        {
+            get
+            {
+                var size = Dimensions.ToArray();
+                return new Size(size[0], size[1]);
+            }
+        }
 
         public string ToInputArgumentsString()
         {
