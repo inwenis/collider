@@ -33,13 +33,26 @@ namespace TestPartialCode
                 var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
                 WorkerArray.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
-                var ts = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Seq);
-                var tp = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Parallel);
+
+                var (ts,x) = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Seq);
+                var (tp,y) = MeasureTime(particlesArr, ppCollisions, FindClosestPpCollision_Parallel);
                 Console.WriteLine($"{file,-40} {ts,15:G} {tp,15:G}");
+
+                foreach (var (a, b) in x.Zip(y, (a, b) => (a, b)))
+                {
+                    if (a.Compare(b))
+                    {
+                        //Console.WriteLine("ok");
+                    }
+                    else
+                    {
+                        Console.WriteLine("what?!");
+                    }
+                }
             }
         }
 
-        private static TimeSpan MeasureTime(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun)
+        private static (TimeSpan, List<Collision> dump) MeasureTime(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun)
         {
             var results = new List<TimeSpan>();
             var dump = new List<Collision>();
@@ -69,7 +82,7 @@ namespace TestPartialCode
             }
 
             var average = results.Average(x => x.TotalMilliseconds);
-            return TimeSpan.FromMilliseconds(average);
+            return (TimeSpan.FromMilliseconds(average), dump);
         }
 
         private static Collision FindClosestPpCollision_Parallel(Particle[] particles, float?[][] ppCollisions)
