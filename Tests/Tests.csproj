@@ -70,6 +70,15 @@
     <None Include="input_f1000_s1000x1000_n0640.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="input_f1000_s1000x1000_n1280.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n2560.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input_f1000_s1000x1000_n5120.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Collider\Collider.csproj">
