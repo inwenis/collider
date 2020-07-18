@@ -50,8 +50,8 @@ namespace TestPartialCode
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                var ts = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential());
-                var tp = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential());
+                var ts = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 0);
+                var tp = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 0);
 
                 var tsAvg = TimeSpan.FromMilliseconds(ts.Average(x => x.TotalMilliseconds));
                 var tpAvg = TimeSpan.FromMilliseconds(tp.Average(x => x.TotalMilliseconds));
