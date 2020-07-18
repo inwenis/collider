@@ -16,7 +16,7 @@ namespace TestPartialCode
             var files = new []
             {
                 @"c:\git\collider\f1000_n1000_800x800.csv",
-                @"c:\git\collider\default_f10000_n800.csv",
+                //@"c:\git\collider\default_f10000_n800.csv",
                 @"c:\git\collider\default_f10000_n400.csv",
                 @"c:\git\collider\default_f10000.csv",
                 @"c:\git\collider\default.csv",
