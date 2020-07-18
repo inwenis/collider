@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using WindowsFormsApp1;
 using WindowsFormsApp1.Csv;
 
@@ -32,56 +31,40 @@ namespace TestPartialCode
                 var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
                 WorkerArray_FindClosestPpCollisionSequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
+                var ts = MeasureTime(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision);
+                var tp = MeasureTime(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision);
 
-                var (ts,x) = MeasureTime(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision);
-                var (tp,y) = MeasureTime(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision);
-                Console.WriteLine($"{file,-40} {ts,15:G} {tp,15:G}");
+                var tsAvg = TimeSpan.FromMilliseconds(ts.Average(x => x.TotalMilliseconds));
+                var tpAvg = TimeSpan.FromMilliseconds(tp.Average(x => x.TotalMilliseconds));
 
-                foreach (var (a, b) in x.Zip(y, (a, b) => (a, b)))
-                {
-                    if (a.Compare(b))
-                    {
-                        //Console.WriteLine("ok");
-                    }
-                    else
-                    {
-                        Console.WriteLine("what?!");
-                    }
-                }
+                Console.WriteLine($"{file,-40} {tsAvg,15:G} {tpAvg,15:G}");
             }
         }
 
-        private static (TimeSpan, List<Collision> dump) MeasureTime(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun)
+        private static List<TimeSpan> MeasureTime(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun, int nWarmups = 10, int nTests = 1000)
         {
             var results = new List<TimeSpan>();
-            var dump = new List<Collision>();
+            var dump = new List<Collision>(); // add results to this list to make sure calls are actually executed
 
             // warmups
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < nWarmups; i++)
             {
-                //Console.WriteLine("----------------");
                 var result = fun(particlesArr, ppCollisions);
                 dump.Add(result);
-                //Console.WriteLine(result);
             }
 
             // actual measurements
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < nTests; i++)
             {
-                //Console.WriteLine("----------------");
                 var sw = new Stopwatch();
-
                 sw.Start();
                 var result = fun(particlesArr, ppCollisions);
                 sw.Stop();
-
-                dump.Add(result);
                 results.Add(sw.Elapsed);
-                //Console.WriteLine(result);
+                dump.Add(result);
             }
 
-            var average = results.Sum(x => x.TotalMilliseconds);
-            return (TimeSpan.FromMilliseconds(average), dump);
+            return results;
         }
     }
 }

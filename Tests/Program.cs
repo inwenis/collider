@@ -73,7 +73,6 @@ namespace Tests
                 for (int i = 0; i < 0; i++)
                 {
                     var particlesClone = particles.Select(x => x.Clone()).ToArray();
-                    Console.WriteLine("----------------");
                     frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
                 }
             });
@@ -85,7 +84,6 @@ namespace Tests
                 for (int i = 0; i < 1; i++)
                 {
                     var particlesClone = particles.Select(x => x.Clone()).ToArray();
-                    Console.WriteLine("----------------");
                     var sw = Stopwatch.StartNew();
                     frames = w.Simulate(particlesClone, size).Take(nFrames).ToList();
                     results.Add(sw.Elapsed);
