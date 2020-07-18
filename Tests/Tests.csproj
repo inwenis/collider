@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{3BB0B609-D17E-4317-A4AF-78D4F60529BD}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>TestPartialCode</RootNamespace>
-    <AssemblyName>TestPartialCode</AssemblyName>
+    <RootNamespace>Tests</RootNamespace>
+    <AssemblyName>Tests</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

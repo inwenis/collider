@@ -37,13 +37,11 @@ namespace WindowsFormsApp1
                 CsvSerializer.ParseCsv(lines, out options, out var outParticles);
                 particles = outParticles.ToList();
 
-                var size = options.Dimensions.ToArray();
-                _size = new Size(size[0], size[1]);
+                _size = options.Size;
             }
             else
             {
-                var size = options.Dimensions.ToArray();
-                _size = new Size(size[0], size[1]);
+                _size = options.Size;
 
                 particles = new List<Particle>{new Particle {Pos = new Vector2(200, 200), Vel = Vector2.Zero, Sig = 20, Mass = 20}};
                 ParticlesGenerator.AddRandomParticles(particles, options.NumberOfParticles, options.Radius, 1, _size);

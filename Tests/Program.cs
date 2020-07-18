@@ -7,7 +7,7 @@ using System.Linq;
 using WindowsFormsApp1;
 using WindowsFormsApp1.Csv;
 
-namespace TestPartialCode
+namespace Tests
 {
     class Program
     {

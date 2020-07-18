@@ -28,13 +28,5 @@
             Dt = dt;
             IsWallCollision = false;
         }
-        public bool Compare(Collision collision)
-        {
-            var r = IsWallCollision == collision.IsWallCollision &&
-                    Dt == collision.Dt &&
-                    IndexI == collision.IndexI &&
-                    IndexJ == collision.IndexJ;
-            return r;
-        }
     }
 }
