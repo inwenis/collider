@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using WindowsFormsApp1;
@@ -22,6 +23,7 @@ namespace TestPartialCode
                 @"c:\git\collider\input_big.csv",
             };
 
+            Console.WriteLine("FindClosestPpCollision measurement");
             Console.WriteLine($"{"file",40} {"seq",15} {"par",15}");
             foreach (var file in files)
             {
@@ -31,8 +33,25 @@ namespace TestPartialCode
                 var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
                 WorkerArray_FindClosestPpCollisionSequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
-                var ts = MeasureTime(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision);
-                var tp = MeasureTime(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision);
+                var ts = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision);
+                var tp = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision);
+
+                var tsAvg = TimeSpan.FromMilliseconds(ts.Average(x => x.TotalMilliseconds));
+                var tpAvg = TimeSpan.FromMilliseconds(tp.Average(x => x.TotalMilliseconds));
+
+                Console.WriteLine($"{file,-40} {tsAvg,15:G} {tpAvg,15:G}");
+            }
+
+            Console.WriteLine("Complete app measurement");
+            Console.WriteLine($"{"file",40} {"seq",15} {"par",15}");
+            foreach (var file in files)
+            {
+                var lines = File.ReadAllLines(file);
+                CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
+                var particlesArr = outParticles.ToArray();
+
+                var ts = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential());
+                var tp = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential());
 
                 var tsAvg = TimeSpan.FromMilliseconds(ts.Average(x => x.TotalMilliseconds));
                 var tpAvg = TimeSpan.FromMilliseconds(tp.Average(x => x.TotalMilliseconds));
@@ -41,7 +60,7 @@ namespace TestPartialCode
             }
         }
 
-        private static List<TimeSpan> MeasureTime(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun, int nWarmups = 10, int nTests = 1000)
+        private static List<TimeSpan> MeasureFunction(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun, int nWarmups = 10, int nTests = 1000)
         {
             var results = new List<TimeSpan>();
             var dump = new List<Collision>(); // add results to this list to make sure calls are actually executed
@@ -63,6 +82,50 @@ namespace TestPartialCode
                 results.Add(sw.Elapsed);
                 dump.Add(result);
             }
+
+            return results;
+        }
+
+        private static List<TimeSpan> MeasureApp(IReadOnlyCollection<Particle> particles, int nFrames, Size size, Func<IWorker> sutFactory, int nWarmups = 2, int nTests = 4)
+        {
+            void WithRedirectedConsoleOut(Action action)
+            {
+                var originalConsoleOut = Console.Out;
+                using (var writer = new StringWriter())
+                {
+                    Console.SetOut(writer);
+                    action();
+                }
+                Console.SetOut(originalConsoleOut);
+            }
+
+            var sut = sutFactory();
+            List<Particle[]> dump;
+
+            WithRedirectedConsoleOut(() =>
+            {
+                // warmups
+                for (int i = 0; i < nWarmups; i++)
+                {
+                    var particlesClone = particles.Select(x => x.Clone()).ToArray();
+                    dump = sut.Simulate(particlesClone, size).Take(nFrames).ToList();
+                }
+            });
+
+            var results = new List<TimeSpan>();
+            WithRedirectedConsoleOut(() =>
+            {
+                // actual measurements
+                for (int i = 0; i < nTests; i++)
+                {
+                    var particlesClone = particles.Select(x => x.Clone()).ToArray();
+                    var sw = new Stopwatch();
+                    sw.Start();
+                    dump = sut.Simulate(particlesClone, size).Take(nFrames).ToList();
+                    sw.Stop();
+                    results.Add(sw.Elapsed);
+                }
+            });
 
             return results;
         }

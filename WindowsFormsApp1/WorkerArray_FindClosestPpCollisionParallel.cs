@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WindowsFormsApp1
 {
-    public class WorkerArray_FindClosestPpCollisionParallel
+    public class WorkerArray_FindClosestPpCollisionParallel : IWorker
     {
         public IEnumerable<Particle[]> Simulate(IEnumerable<Particle> particles, Size size)
         {
