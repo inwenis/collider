@@ -78,6 +78,17 @@ namespace Tests
             }
         }
 
+        static void WithRedirectedConsoleOut(Action action)
+        {
+            var originalConsoleOut = Console.Out;
+            using (var writer = new StringWriter())
+            {
+                Console.SetOut(writer);
+                action();
+            }
+            Console.SetOut(originalConsoleOut);
+        }
+
         private static List<TimeSpan> MeasureFunction(Particle[] particlesArr, float?[][] ppCollisions, Func<Particle[], float?[][], Collision> fun, int nWarmups = 10, int nTests = 1000)
         {
             var results = new List<TimeSpan>();
@@ -106,17 +117,6 @@ namespace Tests
 
         private static List<TimeSpan> MeasureApp(IReadOnlyCollection<Particle> particles, int nFrames, Size size, Func<IWorker> sutFactory, int nWarmups = 2, int nTests = 4)
         {
-            void WithRedirectedConsoleOut(Action action)
-            {
-                var originalConsoleOut = Console.Out;
-                using (var writer = new StringWriter())
-                {
-                    Console.SetOut(writer);
-                    action();
-                }
-                Console.SetOut(originalConsoleOut);
-            }
-
             var sut = sutFactory();
             List<Particle[]> dump;
 
@@ -156,8 +156,14 @@ namespace Tests
             var particlesA = particles.Select(x => x.Clone());
             var particlesB = particles.Select(x => x.Clone());
 
-            var framesA = wA.Simulate(particlesA, size).Take(nFrames).ToList();
-            var framesB = wB.Simulate(particlesB, size).Take(nFrames).ToList();
+            List<Particle[]> framesA = null;
+            List<Particle[]> framesB = null;
+
+            WithRedirectedConsoleOut(() =>
+            {
+                framesA = wA.Simulate(particlesA, size).Take(nFrames).ToList();
+                framesB = wB.Simulate(particlesB, size).Take(nFrames).ToList();
+            });
 
             var (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
 
