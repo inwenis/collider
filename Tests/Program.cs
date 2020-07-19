@@ -22,8 +22,8 @@ namespace Tests
                 "input_f1000_s1000x1000_n0160.csv",
                 "input_f1000_s1000x1000_n0320.csv",
                 "input_f1000_s1000x1000_n0640.csv",
-                "input_f1000_s1000x1000_n1280.csv",
-                "input_f1000_s1000x1000_n2560.csv",
+                //"input_f1000_s1000x1000_n1280.csv",
+                //"input_f1000_s1000x1000_n2560.csv",
                 //"input_f1000_s1000x1000_n5120.csv",
             };
 
@@ -88,23 +88,20 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                var (framesWithDifferences, framesComparisons) = CompareFrames(
-                    particlesArr,
-                    options.NumberOfFrames,
-                    options.Size,
-                    () => new WorkerArray_FindClosestPpCollisionSequential(),
-                    () => new WorkerArray_FindClosestPpCollisionParallel2());
-
-                var message = framesWithDifferences.Any()
-                    ? $"First diff in frame {framesWithDifferences.First()}"
-                    : "OK (no difference)";
-
-                Console.WriteLine($"{file,-40} {message,40}");
-
-                foreach (var framesComparison in framesComparisons.OrderBy(x => x.Key).Select(x => x.Value))
+                List<Particle[]> templateFrames = null;
+                var templateWorker = new WorkerArray_FindClosestPpCollisionParallel();
+                var particlesClone = particlesArr.Select(x => x.Clone());
+                WithRedirectedConsoleOut(() =>
                 {
-                    Console.WriteLine($"{framesComparison.TotalDiff}");
-                }
+                    templateFrames = templateWorker.Simulate(particlesClone, options.Size).Take(options.NumberOfFrames).ToList();
+                });
+
+                var messages = builders
+                    .Select(x => CompareFrames(templateFrames, particlesArr, options.NumberOfFrames, options.Size, x))
+                    .Select(x => x.framesWithDifferences.Any() ? $"fst df frame {x.framesWithDifferences.First(),5}" : "OK (no difference)")
+                    .ToArray();
+
+                Console.WriteLine($"{file,-40} {string.Join(" ", messages)}");
             }
         }
 
@@ -200,26 +197,26 @@ namespace Tests
             return results;
         }
 
-        private static (List<int> framesWithDifferences, Dictionary<int, FrameDiff> framesComparisons) CompareFrames(IReadOnlyCollection<Particle> particles, int nFrames, Size size, Func<IWorker> sutFactoryA, Func<IWorker> sutFactoryB)
+        private static (List<int> framesWithDifferences, Dictionary<int, FrameDiff> framesComparisons) CompareFrames(
+            List<Particle[]> template,
+            IReadOnlyCollection<Particle> particles,
+            int nFrames,
+            Size size,
+            Func<IWorker> sutFactory)
         {
-            var wA = sutFactoryA();
-            var wB = sutFactoryB();
+            var sut = sutFactory();
+            var particlesClone = particles.Select(x => x.Clone());
 
-            var particlesA = particles.Select(x => x.Clone());
-            var particlesB = particles.Select(x => x.Clone());
-
-            List<Particle[]> framesA = null;
-            List<Particle[]> framesB = null;
+            List<Particle[]> frames = null;
 
             WithRedirectedConsoleOut(() =>
             {
-                framesA = wA.Simulate(particlesA, size).Take(nFrames).ToList();
-                framesB = wB.Simulate(particlesB, size).Take(nFrames).ToList();
+                frames = sut.Simulate(particlesClone, size).Take(nFrames).ToList();
             });
 
             List<int> framesWithDifferences;
             Dictionary<int, FrameDiff> framesComparisons;
-            (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
+            (framesWithDifferences, framesComparisons) = Tools.Compare(template, frames);
             return (framesWithDifferences, framesComparisons);
         }
     }

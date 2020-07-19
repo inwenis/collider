@@ -186,7 +186,7 @@ namespace Collider
             var aggregate = temp
                 .AsParallel()
                 .Where(x => x.Item3 != null)
-                .Aggregate((currentMin, compareWith) => compareWith.Item3 < currentMin.Item3 ? compareWith : currentMin);
+                .Aggregate((0, 0, (double?)null), (currentMin, compareWith) => compareWith.Item3 < currentMin.Item3 ? compareWith : currentMin);
 
             return aggregate.Item3.HasValue
                 ? new Collision(particles[aggregate.Item1], aggregate.Item1, particles[aggregate.Item2], aggregate.Item2, (float)aggregate.Item3.Value)
