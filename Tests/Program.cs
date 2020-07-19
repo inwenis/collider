@@ -47,7 +47,7 @@ namespace Tests
                 var sumtp  = TimeSpan.FromMilliseconds(timesPar.Sum(x => x.TotalMilliseconds));
                 var sumtp2 = TimeSpan.FromMilliseconds(timesPar2.Sum(x => x.TotalMilliseconds));
 
-                Console.WriteLine($"{file,-40} {sumts,15:G} {sumtp,15:G} {sumtp2,15:G}");
+                Console.WriteLine(BuildLineWithColors(file, new []{sumts, sumtp, sumtp2}));
             }
 
             Console.WriteLine("Complete simulation measurement (average)");
@@ -65,7 +65,7 @@ namespace Tests
                 var avgp  = TimeSpan.FromMilliseconds(timesPar.Average(x => x.TotalMilliseconds));
                 var avgp2 = TimeSpan.FromMilliseconds(timesPar2.Average(x => x.TotalMilliseconds));
 
-                Console.WriteLine($"{file,-40} {avgs,15:G} {avgp,15:G} {avgp2,15:G}");
+                Console.WriteLine(BuildLineWithColors(file, new[] { avgs, avgp, avgp2 }));
             }
 
             Console.WriteLine("Comparing workers");
@@ -93,6 +93,28 @@ namespace Tests
                     Console.WriteLine($"{framesComparison.TotalDiff}");
                 }
             }
+        }
+
+        private static string BuildLineWithColors(string file, TimeSpan[] all)
+        {
+            const string green = "\u001b[32m";
+            const string white = "\u001b[37m";
+
+            var line = $"{file,-40} ";
+            var min = all.Min();
+            foreach (var value in all)
+            {
+                if (value == min)
+                {
+                    line += $"{green}{value,15:G}{white} ";
+                }
+                else
+                {
+                    line += $"{value,15:G} ";
+                }
+            }
+
+            return line;
         }
 
         static void WithRedirectedConsoleOut(Action action)
