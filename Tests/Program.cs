@@ -27,7 +27,7 @@ namespace Tests
                 //"input_f1000_s1000x1000_n5120.csv",
             };
 
-            Console.WriteLine($"{"file",40} {"seq",15} {"par_justAggregate",15} {"par_AsParallel.Aggregate",15} {"par_WhereAggregate",15} {"par_AsParallelWhereAggregate",15} {"par_AggregateUsingFor",15}");
+            Console.WriteLine($"{"file",-40} {"seq",23} {"par_justAggregate",23} {"par_AsPar.Aggregate",23} {"par_WhereAggregate",23} {"par_AsParWhereAggregate",23} {"par_AggregateUsingFor",23}");
             var functions = new Func<Particle[], float?[][], Collision>[]
             {
                 WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision,
@@ -101,7 +101,7 @@ namespace Tests
                     .Select(x => x.framesWithDifferences.Any() ? $"fst df frame {x.framesWithDifferences.First(),5}" : "OK (no difference)")
                     .ToArray();
 
-                Console.WriteLine($"{file,-40} {string.Join(" ", messages)}");
+                Console.WriteLine($"{file,-40} {string.Join(" ", messages.Select(x => $"{x,23}"))}");
             }
         }
 
@@ -116,11 +116,11 @@ namespace Tests
             {
                 if (value == min)
                 {
-                    line += $"{green}{value,15:G}{white} ";
+                    line += $"{green}{value,23:G}{white} ";
                 }
                 else
                 {
-                    line += $"{value,15:G} ";
+                    line += $"{value,23:G} ";
                 }
             }
 
