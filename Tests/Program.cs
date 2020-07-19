@@ -24,7 +24,7 @@ namespace Tests
                 "input_f1000_s1000x1000_n0640.csv",
                 "input_f1000_s1000x1000_n1280.csv",
                 "input_f1000_s1000x1000_n2560.csv",
-                "input_f1000_s1000x1000_n5120.csv",
+                //"input_f1000_s1000x1000_n5120.csv",
             };
 
             Console.WriteLine($"{"file",40} {"seq",15} {"par",15} {"par2",15}");
@@ -57,9 +57,9 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                var timesSeq  = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 1, 4);
-                var timesPar  = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 1, 4);
-                var timesPar2 = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel2(), 1, 4);
+                var timesSeq  = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 0, 1);
+                var timesPar  = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 0, 1);
+                var timesPar2 = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel2(), 0, 1);
 
                 var avgs  = TimeSpan.FromMilliseconds(timesSeq.Average(x => x.TotalMilliseconds));
                 var avgp  = TimeSpan.FromMilliseconds(timesPar.Average(x => x.TotalMilliseconds));
@@ -82,14 +82,11 @@ namespace Tests
                     () => new WorkerArray_FindClosestPpCollisionSequential(),
                     () => new WorkerArray_FindClosestPpCollisionParallel2());
 
-                if (framesWithDifferences.Any())
-                {
-                    Console.WriteLine($"First diff in frame {framesWithDifferences.First()}");
-                }
-                else
-                {
-                    Console.WriteLine("No diff");
-                }
+                var message = framesWithDifferences.Any()
+                    ? $"First diff in frame {framesWithDifferences.First()}"
+                    : "OK (no difference)";
+
+                Console.WriteLine($"{file,-40} {message,40}");
 
                 foreach (var framesComparison in framesComparisons.OrderBy(x => x.Key).Select(x => x.Value))
                 {
