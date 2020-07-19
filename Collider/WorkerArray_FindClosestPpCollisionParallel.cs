@@ -167,10 +167,6 @@ namespace Collider
         public static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions)
         {
             // PP collision - particle - particle collision
-            var minI = 0;
-            var minJ = 0;
-            var collisionExists = false;
-
             var temp = new (int, int, double?)[particles.Length];
 
             Parallel.For(0, particles.Length, i =>
@@ -187,33 +183,32 @@ namespace Collider
                 }
             });
 
-            var accumulate = temp.Aggregate((0, 0, (double?)null), (acc, y) =>
+            var aggregate = temp.Aggregate((0, 0, (double?)null), (currentMin, compareWith) =>
             {
-                if (!acc.Item3.HasValue && !y.Item3.HasValue)
+                if (!currentMin.Item3.HasValue && !compareWith.Item3.HasValue)
                 {
-                    return acc;
+                    return currentMin;
                 }
 
-                if (!acc.Item3.HasValue)
+                if (!currentMin.Item3.HasValue)
                 {
-                    return y;
+                    return compareWith;
                 }
 
-                if (!y.Item3.HasValue)
+                if (!compareWith.Item3.HasValue)
                 {
-                    return acc;
+                    return currentMin;
                 }
 
-                if (y.Item3 < acc.Item3)
+                if (compareWith.Item3 < currentMin.Item3)
                 {
-                    return y;
+                    return compareWith;
                 }
-                return acc;
+                return currentMin;
             });
 
-            double? accumulateItem3 = accumulate.Item3;
-            return accumulate.Item3.HasValue
-                ? new Collision(particles[accumulate.Item1], accumulate.Item1, particles[accumulate.Item2], accumulate.Item2, (float)accumulateItem3.Value)
+            return aggregate.Item3.HasValue
+                ? new Collision(particles[aggregate.Item1], aggregate.Item1, particles[aggregate.Item2], aggregate.Item2, (float)aggregate.Item3.Value)
                 : null;
         }
 

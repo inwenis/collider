@@ -168,10 +168,6 @@ namespace Collider
         public static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions)
         {
             // PP collision - particle - particle collision
-            var minI = 0;
-            var minJ = 0;
-            var collisionExists = false;
-
             var temp = new (int, int, double?)[particles.Length];
 
             Parallel.For(0, particles.Length, i =>
@@ -188,22 +184,18 @@ namespace Collider
                 }
             });
 
-            double curMin = double.MaxValue;
-            (int, int, double?) x = (0, 0, null);
+            (int, int, double?) min = (0, 0, null);
             for (int i = 0; i < temp.Length; i++)
             {
-                if (temp[i].Item3 < curMin)
+                if (temp[i].Item3 < min.Item3 || min.Item3 == null)
                 {
-                    curMin = temp[i].Item3.Value;
-                    x = temp[i];
+                    min = temp[i];
                 }
             }
 
-            if (x.Item3 != null)
-            {
-                return new Collision(particles[x.Item1], x.Item1, particles[x.Item2], x.Item2, (float) curMin);
-            }
-            return null;
+            return min.Item3 != null
+                ? new Collision(particles[min.Item1], min.Item1, particles[min.Item2], min.Item2, (float) min.Item3)
+                : null;
         }
 
         private static Collision FindClosestPwCollision(Particle[] particles, float?[][] wallCollisions)
