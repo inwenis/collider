@@ -38,13 +38,13 @@ namespace Tests
                 var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
                 WorkerArray_FindClosestPpCollisionSequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
-                var ts = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision);
-                var tp = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision);
-                var tp2 = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel2.FindClosestPpCollision);
+                var ts = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision, 10, 10000);
+                var tp = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision, 10, 10000);
+                var tp2 = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel2.FindClosestPpCollision, 10, 10000);
 
-                var tsAvg = TimeSpan.FromMilliseconds(ts.Average(x => x.TotalMilliseconds));
-                var tpAvg = TimeSpan.FromMilliseconds(tp.Average(x => x.TotalMilliseconds));
-                var tp2Avg = TimeSpan.FromMilliseconds(tp2.Average(x => x.TotalMilliseconds));
+                var tsAvg = TimeSpan.FromMilliseconds(ts.Sum(x => x.TotalMilliseconds));
+                var tpAvg = TimeSpan.FromMilliseconds(tp.Sum(x => x.TotalMilliseconds));
+                var tp2Avg = TimeSpan.FromMilliseconds(tp2.Sum(x => x.TotalMilliseconds));
 
                 Console.WriteLine($"{file,-40} {tsAvg,15:G} {tpAvg,15:G} {tp2Avg,15:G}");
             }
@@ -56,9 +56,9 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                var ts = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 0, 1);
-                var tp = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 0, 1);
-                var tp2 = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel2(), 0, 1);
+                var ts = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 1, 4);
+                var tp = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 1, 4);
+                var tp2 = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel2(), 1, 4);
 
                 var tsAvg = TimeSpan.FromMilliseconds(ts.Average(x => x.TotalMilliseconds));
                 var tpAvg = TimeSpan.FromMilliseconds(tp.Average(x => x.TotalMilliseconds));
