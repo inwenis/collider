@@ -27,7 +27,26 @@ namespace Tests
                 //"input_f1000_s1000x1000_n5120.csv",
             };
 
-            Console.WriteLine($"{"file",40} {"seq",15} {"par",15} {"par2",15}");
+            Console.WriteLine($"{"file",40} {"seq",15} {"par_justAggregate",15} {"par_AsParallel.Aggregate",15} {"par_WhereAggregate",15} {"par_AsParallelWhereAggregate",15} {"par_AggregateUsingFor",15}");
+            var functions = new Func<Particle[], float?[][], Collision>[]
+            {
+                WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision,
+                WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision,
+                WorkerArray_FindClosestPpCollisionParallel_AsParallelAggregation.FindClosestPpCollision,
+                WorkerArray_FindClosestPpCollisionParallel_WhereAggregate.FindClosestPpCollision,
+                WorkerArray_FindClosestPpCollisionParallel_AsParallelWhereAggregate.FindClosestPpCollision,
+                WorkerArray_FindClosestPpCollisionParallel2.FindClosestPpCollision,
+            };
+
+            var builders = new Func<IWorker>[]
+            {
+                () => new WorkerArray_FindClosestPpCollisionSequential(),
+                () => new WorkerArray_FindClosestPpCollisionParallel(),
+                () => new WorkerArray_FindClosestPpCollisionParallel_AsParallelAggregation(),
+                () => new WorkerArray_FindClosestPpCollisionParallel_WhereAggregate(),
+                () => new WorkerArray_FindClosestPpCollisionParallel_AsParallelWhereAggregate(),
+                () => new WorkerArray_FindClosestPpCollisionParallel2(),
+            };
 
             Console.WriteLine("FindClosestPpCollision() measurement (sum of x runs)");
             foreach (var file in files)
@@ -38,16 +57,13 @@ namespace Tests
                 var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
                 WorkerArray_FindClosestPpCollisionSequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
-                var timesSeq  = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision, 10, 10000);
-                var timesPar  = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision, 10, 10000);
-                var timesPar2 = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel2.FindClosestPpCollision, 10, 10000);
-
                 // use Sum() instead of average because measurements are so small
-                var sumts  = TimeSpan.FromMilliseconds(timesSeq.Sum(x => x.TotalMilliseconds));
-                var sumtp  = TimeSpan.FromMilliseconds(timesPar.Sum(x => x.TotalMilliseconds));
-                var sumtp2 = TimeSpan.FromMilliseconds(timesPar2.Sum(x => x.TotalMilliseconds));
+                var sums = functions
+                    .Select(x => MeasureFunction(particlesArr, ppCollisions, x, 10, 10000))
+                    .Select(results => TimeSpan.FromMilliseconds(results.Sum(x => x.TotalMilliseconds)))
+                    .ToArray();
 
-                Console.WriteLine(BuildLineWithColors(file, new []{sumts, sumtp, sumtp2}));
+                Console.WriteLine(BuildLineWithColors(file, sums.ToArray()));
             }
 
             Console.WriteLine("Complete simulation measurement (average)");
@@ -57,15 +73,12 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                var timesSeq  = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 0, 1);
-                var timesPar  = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 0, 1);
-                var timesPar2 = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel2(), 0, 1);
+                var averages = builders
+                    .Select(x => MeasureApp(particlesArr, options.NumberOfFrames, options.Size, x, 0, 1))
+                    .Select(results => TimeSpan.FromMilliseconds(results.Average(x => x.TotalMilliseconds)))
+                    .ToArray();
 
-                var avgs  = TimeSpan.FromMilliseconds(timesSeq.Average(x => x.TotalMilliseconds));
-                var avgp  = TimeSpan.FromMilliseconds(timesPar.Average(x => x.TotalMilliseconds));
-                var avgp2 = TimeSpan.FromMilliseconds(timesPar2.Average(x => x.TotalMilliseconds));
-
-                Console.WriteLine(BuildLineWithColors(file, new[] { avgs, avgp, avgp2 }));
+                Console.WriteLine(BuildLineWithColors(file, averages));
             }
 
             Console.WriteLine("Comparing workers");
@@ -95,7 +108,7 @@ namespace Tests
             }
         }
 
-        private static string BuildLineWithColors(string file, TimeSpan[] all)
+        private static string BuildLineWithColors(string file, IReadOnlyCollection<TimeSpan> all)
         {
             const string green = "\u001b[32m";
             const string white = "\u001b[37m";
