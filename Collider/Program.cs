@@ -76,15 +76,13 @@ namespace Collider
                 })
                 .ToList();
 
-            _mainForm = new Form1();
-            _mainForm.TrackBar1.Minimum = 0;
-            _mainForm.TrackBar1.Maximum = options.NumberOfFrames - 1;
+            _mainForm = new Form1 {TrackBar1 = {Minimum = 0, Maximum = options.NumberOfFrames - 1}};
             _mainForm.TrackBar1.Scroll += TrackBar1_Scroll;
 
             // wait 500ms before starting timer to let window be created
             Timer t = new Timer(obj => PrintFrames(), null, 500, -1);
-
             Application.Run(_mainForm);
+            t.Dispose();
         }
 
         private static void TrackBar1_Scroll(object sender, EventArgs e)

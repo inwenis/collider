@@ -11,7 +11,7 @@ namespace Tests
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             var files = new []
             {
@@ -33,7 +33,7 @@ namespace Tests
             foreach (var file in files)
             {
                 var lines = File.ReadAllLines(file);
-                CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
+                CsvSerializer.ParseCsv(lines, out _, out var outParticles);
                 var particlesArr = outParticles.ToArray();
                 var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
                 WorkerArray_FindClosestPpCollisionSequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);

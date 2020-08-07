@@ -30,23 +30,5 @@ namespace Collider
                 return new Size(size[0], size[1]);
             }
         }
-
-        public string ToInputArgumentsString()
-        {
-            if (ParticlesFile != null)
-            {
-                return $"--{nameof(NumberOfFrames)}={NumberOfFrames} " +
-                       $"--{nameof(Radius)}={Radius} " +
-                       $"--{nameof(ParticlesFile)}={ParticlesFile} " +
-                       $"--size={string.Join(",", Dimensions)}";
-            }
-            else
-            {
-                return $"--{nameof(NumberOfFrames)}={NumberOfFrames} " +
-                       $"--{nameof(Radius)}={Radius} " +
-                       $"--{nameof(NumberOfParticles)}={NumberOfParticles} " +
-                       $"--size={string.Join(",", Dimensions)}";
-            }
-        }
     }
 }
