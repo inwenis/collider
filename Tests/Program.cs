@@ -22,31 +22,23 @@ namespace Tests
                 "input_f1000_s1000x1000_n0160.csv",
                 "input_f1000_s1000x1000_n0320.csv",
                 "input_f1000_s1000x1000_n0640.csv",
-                //"input_f1000_s1000x1000_n1280.csv",
+                "input_f1000_s1000x1000_n1280.csv",
                 //"input_f1000_s1000x1000_n2560.csv",
                 //"input_f1000_s1000x1000_n5120.csv",
             };
 
-            Console.WriteLine($"{"file",-40} {"seq",23} {"par_justAggregate",23} {"par_AsPar.Aggregate",23} {"par_WhereAggregate",23} {"par_AsParWhereAggregate",23} {"par_AggregateUsingFor",23}");
-            var functions = new Func<Particle[], float?[][], Collision>[]
+            var workers = new (string, Func<Particle[], float?[][], Collision>, Func<IWorker>)[]
             {
-                Worker_Sequential.FindClosestPpCollision,
-                Worker_Parallel_justAggregate.FindClosestPpCollision,
-                Worker_Parallel_AsParallelAggregation.FindClosestPpCollision,
-                Worker_Parallel_WhereAggregate.FindClosestPpCollision,
-                Worker_Parallel_AsParallelWhereAggregate.FindClosestPpCollision,
-                Worker_Parallel_AggreagteUsing_For.FindClosestPpCollision,
+                ("Sequential"        , Worker_Sequential.FindClosestPpCollision                        , () => new Worker_Sequential()),
+                ("par_justAgg"       , Worker_Parallel_justAggregate.FindClosestPpCollision            , () => new Worker_Parallel_justAggregate()),
+                ("par_AsParallelAgg" , Worker_Parallel_AsParallelAggregation.FindClosestPpCollision    , () => new Worker_Parallel_AsParallelAggregation()),
+                ("par_WhereAgg"      , Worker_Parallel_WhereAggregate.FindClosestPpCollision           , () => new Worker_Parallel_WhereAggregate()),
+                ("par_AsParWhereAgg" , Worker_Parallel_AsParallelWhereAggregate.FindClosestPpCollision , () => new Worker_Parallel_AsParallelWhereAggregate()),
+                ("par_AggUsingFor"   , Worker_Parallel_AggreagteUsing_For.FindClosestPpCollision       , () => new Worker_Parallel_AggreagteUsing_For()),
             };
 
-            var builders = new Func<IWorker>[]
-            {
-                () => new Worker_Sequential(),
-                () => new Worker_Parallel_justAggregate(),
-                () => new Worker_Parallel_AsParallelAggregation(),
-                () => new Worker_Parallel_WhereAggregate(),
-                () => new Worker_Parallel_AsParallelWhereAggregate(),
-                () => new Worker_Parallel_AggreagteUsing_For(),
-            };
+            var names = string.Join(" ", workers.Select(x => $"{x.Item1,23}"));
+            Console.WriteLine($"{"file",-40} {names}");
 
             Console.WriteLine("FindClosestPpCollision() measurement (sum of x runs)");
             foreach (var file in files)
@@ -58,7 +50,8 @@ namespace Tests
                 Worker_Sequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
                 // use Sum() instead of average because measurements are so small
-                var sums = functions
+                var sums = workers
+                    .Select(x => x.Item2)
                     .Select(x => MeasureFunction(particlesArr, ppCollisions, x, 10, 10000))
                     .Select(results => TimeSpan.FromMilliseconds(results.Sum(x => x.TotalMilliseconds)))
                     .ToArray();
@@ -73,7 +66,8 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                var averages = builders
+                var averages = workers
+                    .Select(x => x.Item3)
                     .Select(x => MeasureApp(particlesArr, options.NumberOfFrames, options.Size, x, 0, 1))
                     .Select(results => TimeSpan.FromMilliseconds(results.Average(x => x.TotalMilliseconds)))
                     .ToArray();
@@ -96,7 +90,8 @@ namespace Tests
                     templateFrames = templateWorker.Simulate(particlesClone, options.Size).Take(options.NumberOfFrames).ToList();
                 });
 
-                var messages = builders
+                var messages = workers
+                    .Select(x => x.Item3)
                     .Select(x => CompareFrames(templateFrames, particlesArr, options.NumberOfFrames, options.Size, x))
                     .Select(x => x.framesWithDifferences.Any() ? $"fst df frame {x.framesWithDifferences.First(),5}" : "OK (no difference)")
                     .ToArray();
