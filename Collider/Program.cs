@@ -52,7 +52,7 @@ namespace Collider
                 Console.WriteLine($"Particles saved to {fileName}. To rerun use: --file={fileName}");
             }
 
-            var w = new WorkerArray_FindClosestPpCollisionParallel();
+            var w = new Worker_Parallel_justAggregate();
 
             var frames = new List<Particle[]>();
             var p = Progress.StartNew(options.NumberOfFrames);

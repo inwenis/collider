@@ -30,22 +30,22 @@ namespace Tests
             Console.WriteLine($"{"file",-40} {"seq",23} {"par_justAggregate",23} {"par_AsPar.Aggregate",23} {"par_WhereAggregate",23} {"par_AsParWhereAggregate",23} {"par_AggregateUsingFor",23}");
             var functions = new Func<Particle[], float?[][], Collision>[]
             {
-                WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision,
-                WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision,
-                WorkerArray_FindClosestPpCollisionParallel_AsParallelAggregation.FindClosestPpCollision,
-                WorkerArray_FindClosestPpCollisionParallel_WhereAggregate.FindClosestPpCollision,
-                WorkerArray_FindClosestPpCollisionParallel_AsParallelWhereAggregate.FindClosestPpCollision,
-                WorkerArray_FindClosestPpCollisionParallel2.FindClosestPpCollision,
+                Worker_Sequential.FindClosestPpCollision,
+                Worker_Parallel_justAggregate.FindClosestPpCollision,
+                Worker_Parallel_AsParallelAggregation.FindClosestPpCollision,
+                Worker_Parallel_WhereAggregate.FindClosestPpCollision,
+                Worker_Parallel_AsParallelWhereAggregate.FindClosestPpCollision,
+                Worker_Parallel_AggreagteUsing_For.FindClosestPpCollision,
             };
 
             var builders = new Func<IWorker>[]
             {
-                () => new WorkerArray_FindClosestPpCollisionSequential(),
-                () => new WorkerArray_FindClosestPpCollisionParallel(),
-                () => new WorkerArray_FindClosestPpCollisionParallel_AsParallelAggregation(),
-                () => new WorkerArray_FindClosestPpCollisionParallel_WhereAggregate(),
-                () => new WorkerArray_FindClosestPpCollisionParallel_AsParallelWhereAggregate(),
-                () => new WorkerArray_FindClosestPpCollisionParallel2(),
+                () => new Worker_Sequential(),
+                () => new Worker_Parallel_justAggregate(),
+                () => new Worker_Parallel_AsParallelAggregation(),
+                () => new Worker_Parallel_WhereAggregate(),
+                () => new Worker_Parallel_AsParallelWhereAggregate(),
+                () => new Worker_Parallel_AggreagteUsing_For(),
             };
 
             Console.WriteLine("FindClosestPpCollision() measurement (sum of x runs)");
@@ -55,7 +55,7 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out _, out var outParticles);
                 var particlesArr = outParticles.ToArray();
                 var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
-                WorkerArray_FindClosestPpCollisionSequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);
+                Worker_Sequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
                 // use Sum() instead of average because measurements are so small
                 var sums = functions
@@ -89,7 +89,7 @@ namespace Tests
                 var particlesArr = outParticles.ToArray();
 
                 List<Particle[]> templateFrames = null;
-                var templateWorker = new WorkerArray_FindClosestPpCollisionParallel();
+                var templateWorker = new Worker_Parallel_justAggregate();
                 var particlesClone = particlesArr.Select(x => x.Clone());
                 WithRedirectedConsoleOut(() =>
                 {

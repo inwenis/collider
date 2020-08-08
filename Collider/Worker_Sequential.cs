@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace Collider
 {
-    public class WorkerArray_FindClosestPpCollisionSequential : IWorker
+    public class Worker_Sequential : IWorker
     {
         public IEnumerable<Particle[]> Simulate(IEnumerable<Particle> particles, Size size)
         {

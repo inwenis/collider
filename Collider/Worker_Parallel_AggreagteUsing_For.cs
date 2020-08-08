@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace Collider
 {
-    public class WorkerArray_FindClosestPpCollisionParallel_AsParallelWhereAggregate : IWorker
+    // diffrent aggregator function in FindClosestPpCollision
+    public class Worker_Parallel_AggreagteUsing_For : IWorker
     {
         public IEnumerable<Particle[]> Simulate(IEnumerable<Particle> particles, Size size)
         {
@@ -183,21 +184,17 @@ namespace Collider
                 }
             });
 
-            var aggregate = temp
-                .AsParallel()
-                .Where(x => x.Item3 != null)
-                .Aggregate((0, 0, (double?)null), (cur, inc) =>
+            (int, int, double?) min = (0, 0, null);
+            for (int i = 0; i < temp.Length; i++)
+            {
+                if (temp[i].Item3 < min.Item3 || min.Item3 == null)
                 {
-                    if (!cur.Item3.HasValue)
-                    {
-                        return inc;
-                    }
+                    min = temp[i];
+                }
+            }
 
-                    return inc.Item3 < cur.Item3 ? inc : cur;
-                });
-
-            return aggregate.Item3.HasValue
-                ? new Collision(particles[aggregate.Item1], aggregate.Item1, particles[aggregate.Item2], aggregate.Item2, (float)aggregate.Item3.Value)
+            return min.Item3 != null
+                ? new Collision(particles[min.Item1], min.Item1, particles[min.Item2], min.Item2, (float) min.Item3)
                 : null;
         }
 

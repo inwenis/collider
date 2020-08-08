@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Collider
 {
-    public class WorkerArray_FindClosestPpCollisionParallel_AsParallelAggregation : IWorker
+    public class Worker_Parallel_AsParallelAggregation : IWorker
     {
         public IEnumerable<Particle[]> Simulate(IEnumerable<Particle> particles, Size size)
         {
