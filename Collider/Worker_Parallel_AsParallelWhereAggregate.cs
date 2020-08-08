@@ -4,10 +4,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace Collider
 {
-    public class WorkerArray_FindClosestPpCollisionSequential : IWorker
+    public class Worker_Parallel_AsParallelWhereAggregate : IWorker
     {
         public IEnumerable<Particle[]> Simulate(IEnumerable<Particle> particles, Size size)
         {
@@ -166,26 +167,37 @@ namespace Collider
         public static Collision FindClosestPpCollision(Particle[] particles, float?[][] ppCollisions)
         {
             // PP collision - particle - particle collision
-            var minI = 0;
-            var minJ = 0;
-            var minDt = float.MaxValue;
-            var collisionExists = false;
-            for (var i = 0; i < particles.Length; i++)
+            var temp = new (int, int, double?)[particles.Length];
+
+            Parallel.For(0, particles.Length, i =>
             {
+                var minDt = float.MaxValue;
                 for (var j = i + 1; j < particles.Length; j++)
                 {
                     if (ppCollisions[i][j].HasValue && ppCollisions[i][j] < minDt)
                     {
-                        minI = i;
-                        minJ = j;
-                        minDt = ppCollisions[i][j].Value;
-                        collisionExists = true;
+                        temp[i].Item1 = i;
+                        temp[i].Item2 = j;
+                        temp[i].Item3 = minDt = ppCollisions[i][j].Value;
                     }
                 }
-            }
+            });
 
-            return collisionExists
-                ? new Collision(particles[minI], minI, particles[minJ], minJ, minDt)
+            var aggregate = temp
+                .AsParallel()
+                .Where(x => x.Item3 != null)
+                .Aggregate((0, 0, (double?)null), (cur, inc) =>
+                {
+                    if (!cur.Item3.HasValue)
+                    {
+                        return inc;
+                    }
+
+                    return inc.Item3 < cur.Item3 ? inc : cur;
+                });
+
+            return aggregate.Item3.HasValue
+                ? new Collision(particles[aggregate.Item1], aggregate.Item1, particles[aggregate.Item2], aggregate.Item2, (float)aggregate.Item3.Value)
                 : null;
         }
 

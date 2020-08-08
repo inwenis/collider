@@ -23,11 +23,22 @@ namespace Tests
                 "input_f1000_s1000x1000_n0320.csv",
                 "input_f1000_s1000x1000_n0640.csv",
                 "input_f1000_s1000x1000_n1280.csv",
-                "input_f1000_s1000x1000_n2560.csv",
+                //"input_f1000_s1000x1000_n2560.csv",
                 //"input_f1000_s1000x1000_n5120.csv",
             };
 
-            Console.WriteLine($"{"file",40} {"seq",15} {"par",15} {"par2",15}");
+            var workers = new (string, Func<Particle[], float?[][], Collision>, Func<IWorker>)[]
+            {
+                ("Sequential"        , Worker_Sequential.FindClosestPpCollision                        , () => new Worker_Sequential()),
+                ("par_justAgg"       , Worker_Parallel_justAggregate.FindClosestPpCollision            , () => new Worker_Parallel_justAggregate()),
+                ("par_AsParallelAgg" , Worker_Parallel_AsParallelAggregation.FindClosestPpCollision    , () => new Worker_Parallel_AsParallelAggregation()),
+                ("par_WhereAgg"      , Worker_Parallel_WhereAggregate.FindClosestPpCollision           , () => new Worker_Parallel_WhereAggregate()),
+                ("par_AsParWhereAgg" , Worker_Parallel_AsParallelWhereAggregate.FindClosestPpCollision , () => new Worker_Parallel_AsParallelWhereAggregate()),
+                ("par_AggUsingFor"   , Worker_Parallel_AggreagteUsing_For.FindClosestPpCollision       , () => new Worker_Parallel_AggreagteUsing_For()),
+            };
+
+            var names = string.Join(" ", workers.Select(x => $"{x.Item1,23}"));
+            Console.WriteLine($"{"file",-40} {names}");
 
             Console.WriteLine("FindClosestPpCollision() measurement (sum of x runs)");
             foreach (var file in files)
@@ -36,18 +47,16 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out _, out var outParticles);
                 var particlesArr = outParticles.ToArray();
                 var ppCollisions = Array2D.Create<float?>(particlesArr.Length, particlesArr.Length);
-                WorkerArray_FindClosestPpCollisionSequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);
-
-                var timesSeq  = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionSequential.FindClosestPpCollision, 10, 10000);
-                var timesPar  = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel.FindClosestPpCollision, 10, 10000);
-                var timesPar2 = MeasureFunction(particlesArr, ppCollisions, WorkerArray_FindClosestPpCollisionParallel2.FindClosestPpCollision, 10, 10000);
+                Worker_Sequential.SetAllPpCollisions(particlesArr, ppCollisions, 0);
 
                 // use Sum() instead of average because measurements are so small
-                var sumts  = TimeSpan.FromMilliseconds(timesSeq.Sum(x => x.TotalMilliseconds));
-                var sumtp  = TimeSpan.FromMilliseconds(timesPar.Sum(x => x.TotalMilliseconds));
-                var sumtp2 = TimeSpan.FromMilliseconds(timesPar2.Sum(x => x.TotalMilliseconds));
+                var sums = workers
+                    .Select(x => x.Item2)
+                    .Select(x => MeasureFunction(particlesArr, ppCollisions, x, 10, 10000))
+                    .Select(results => TimeSpan.FromMilliseconds(results.Sum(x => x.TotalMilliseconds)))
+                    .ToArray();
 
-                Console.WriteLine(BuildLineWithColors(file, new []{sumts, sumtp, sumtp2}));
+                Console.WriteLine(BuildLineWithColors(file, sums.ToArray()));
             }
 
             Console.WriteLine("Complete simulation measurement (average)");
@@ -57,15 +66,13 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                var timesSeq  = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionSequential(), 0, 1);
-                var timesPar  = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel(), 0, 1);
-                var timesPar2 = MeasureApp(particlesArr, options.NumberOfFrames, options.Size, () => new WorkerArray_FindClosestPpCollisionParallel2(), 0, 1);
+                var averages = workers
+                    .Select(x => x.Item3)
+                    .Select(x => MeasureApp(particlesArr, options.NumberOfFrames, options.Size, x, 0, 1))
+                    .Select(results => TimeSpan.FromMilliseconds(results.Average(x => x.TotalMilliseconds)))
+                    .ToArray();
 
-                var avgs  = TimeSpan.FromMilliseconds(timesSeq.Average(x => x.TotalMilliseconds));
-                var avgp  = TimeSpan.FromMilliseconds(timesPar.Average(x => x.TotalMilliseconds));
-                var avgp2 = TimeSpan.FromMilliseconds(timesPar2.Average(x => x.TotalMilliseconds));
-
-                Console.WriteLine(BuildLineWithColors(file, new[] { avgs, avgp, avgp2 }));
+                Console.WriteLine(BuildLineWithColors(file, averages));
             }
 
             Console.WriteLine("Comparing workers");
@@ -75,27 +82,25 @@ namespace Tests
                 CsvSerializer.ParseCsv(lines, out var options, out var outParticles);
                 var particlesArr = outParticles.ToArray();
 
-                var (framesWithDifferences, framesComparisons) = CompareFrames(
-                    particlesArr,
-                    options.NumberOfFrames,
-                    options.Size,
-                    () => new WorkerArray_FindClosestPpCollisionSequential(),
-                    () => new WorkerArray_FindClosestPpCollisionParallel2());
-
-                var message = framesWithDifferences.Any()
-                    ? $"First diff in frame {framesWithDifferences.First()}"
-                    : "OK (no difference)";
-
-                Console.WriteLine($"{file,-40} {message,40}");
-
-                foreach (var framesComparison in framesComparisons.OrderBy(x => x.Key).Select(x => x.Value))
+                List<Particle[]> templateFrames = null;
+                var templateWorker = new Worker_Parallel_justAggregate();
+                var particlesClone = particlesArr.Select(x => x.Clone());
+                WithRedirectedConsoleOut(() =>
                 {
-                    Console.WriteLine($"{framesComparison.TotalDiff}");
-                }
+                    templateFrames = templateWorker.Simulate(particlesClone, options.Size).Take(options.NumberOfFrames).ToList();
+                });
+
+                var messages = workers
+                    .Select(x => x.Item3)
+                    .Select(x => CompareFrames(templateFrames, particlesArr, options.NumberOfFrames, options.Size, x))
+                    .Select(x => x.framesWithDifferences.Any() ? $"fst df frame {x.framesWithDifferences.First(),5}" : "OK (no difference)")
+                    .ToArray();
+
+                Console.WriteLine($"{file,-40} {string.Join(" ", messages.Select(x => $"{x,23}"))}");
             }
         }
 
-        private static string BuildLineWithColors(string file, TimeSpan[] all)
+        private static string BuildLineWithColors(string file, IReadOnlyCollection<TimeSpan> all)
         {
             const string green = "\u001b[32m";
             const string white = "\u001b[37m";
@@ -106,11 +111,11 @@ namespace Tests
             {
                 if (value == min)
                 {
-                    line += $"{green}{value,15:G}{white} ";
+                    line += $"{green}{value,23:G}{white} ";
                 }
                 else
                 {
-                    line += $"{value,15:G} ";
+                    line += $"{value,23:G} ";
                 }
             }
 
@@ -187,26 +192,26 @@ namespace Tests
             return results;
         }
 
-        private static (List<int> framesWithDifferences, Dictionary<int, FrameDiff> framesComparisons) CompareFrames(IReadOnlyCollection<Particle> particles, int nFrames, Size size, Func<IWorker> sutFactoryA, Func<IWorker> sutFactoryB)
+        private static (List<int> framesWithDifferences, Dictionary<int, FrameDiff> framesComparisons) CompareFrames(
+            List<Particle[]> template,
+            IReadOnlyCollection<Particle> particles,
+            int nFrames,
+            Size size,
+            Func<IWorker> sutFactory)
         {
-            var wA = sutFactoryA();
-            var wB = sutFactoryB();
+            var sut = sutFactory();
+            var particlesClone = particles.Select(x => x.Clone());
 
-            var particlesA = particles.Select(x => x.Clone());
-            var particlesB = particles.Select(x => x.Clone());
-
-            List<Particle[]> framesA = null;
-            List<Particle[]> framesB = null;
+            List<Particle[]> frames = null;
 
             WithRedirectedConsoleOut(() =>
             {
-                framesA = wA.Simulate(particlesA, size).Take(nFrames).ToList();
-                framesB = wB.Simulate(particlesB, size).Take(nFrames).ToList();
+                frames = sut.Simulate(particlesClone, size).Take(nFrames).ToList();
             });
 
             List<int> framesWithDifferences;
             Dictionary<int, FrameDiff> framesComparisons;
-            (framesWithDifferences, framesComparisons) = Tools.Compare(framesA, framesB);
+            (framesWithDifferences, framesComparisons) = Tools.Compare(template, frames);
             return (framesWithDifferences, framesComparisons);
         }
     }

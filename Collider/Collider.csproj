@@ -76,9 +76,12 @@
     <Compile Include="Progress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools.cs" />
-    <Compile Include="WorkerArray_FindClosestPpCollisionParallel2.cs" />
-    <Compile Include="WorkerArray_FindClosestPpCollisionParallel.cs" />
-    <Compile Include="WorkerArray_FindClosestPpCollisionSequential.cs" />
+    <Compile Include="Worker_Parallel_AsParallelWhereAggregate.cs" />
+    <Compile Include="Worker_Parallel_WhereAggregate.cs" />
+    <Compile Include="Worker_Parallel_AsParallelAggregation.cs" />
+    <Compile Include="Worker_Parallel_AggreagteUsing_For.cs" />
+    <Compile Include="Worker_Parallel_justAggregate.cs" />
+    <Compile Include="Worker_Sequential.cs" />
     <Compile Include="Worker.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
